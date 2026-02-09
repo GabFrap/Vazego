@@ -1,0 +1,158 @@
+{
+  "2026-02-08": [
+    {
+      "category": "Géographie",
+      "categoryIcon": "🌍",
+      "clues": [
+        "Ce petit état insulaire d'Europe de l'Ouest avait une population de 5 millions d'habitants en 2021.",
+        "Sa population a connu une émigration massive vers l'Amérique suite à une grande famine au milieu du 19e siècle.",
+        "La capitale de l'I_________ est Dublin."
+      ],
+      "answer": "IRLANDE",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    },
+    {
+      "category": "Cinéma",
+      "categoryIcon": "🎬",
+      "clues": [
+        "Ce réalisateur américain est le fondateur de la Word Cinema Foundation et le président de la Film Foundation. (nom de famille)",
+        "Il a obtenu la Palme d'or au Festival de Cannes en 1976 pour Taxi Driver.",
+        "Martin ___________ a aussi réalisé Gangs of New York, Shutter Island et The Wolf of Wall Street."
+      ],
+      "answer": "SCORCESE",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    },
+    {
+      "category": "Science",
+      "categoryIcon": "🔬",
+      "clues": [
+        "Il est formé de l'assemblage de trois composants : un quark up et deux quarks down, liés par des gluons.",
+        "Cette particule sans charge électrique, compose, avec le proton, le noyau d'un atome.",
+        "Alors que le proton détermine les propriétés chimiques de l'atome, le N________ détermine son isotope."
+      ],
+      "answer": "NEUTRON",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    }
+  ],
+  "2026-02-09": [
+    {
+      "category": "Histoire",
+      "categoryIcon": "📜",
+      "clues": [
+        "Une conférence historique s'est tenue dans cette ville du 4 au 11 février 1945.",
+        "Elle a réuni Franklin D. Roosevelt, Joseph Staline et Winston Churchill dans la péninsule de Crimée.",
+        "Plusieurs considèrent que c'est lors de la conférence de Y_______ que les Alliés se sont \"partagé le monde\"."
+      ],
+      "answer": "YALTA",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    },
+    {
+      "category": "Littérature",
+      "categoryIcon": "📚",
+      "clues": [
+        "Cette autrice belge prolifique publie un roman par an depuis 1992. (nom de famille)",
+        "Elle a publié Hygiène de l'Assassin et les Catilinaires.",
+        "Dans Métaphysique des tubes, Amélie _______ raconte les trois premières années de sa vie au Japon."
+      ],
+      "answer": "NOTHOMB",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    },
+    {
+      "category": "Objet",
+      "categoryIcon": "🔨",
+      "clues": [
+        "Cet instrument de la famille des percussions idiophones consiste en un disque de métal généralement percé en son centre.",
+        "On la percute avec une baguette pour produire un son aigu (ping).",
+        "La C_______ est un disque de métal qui entre dans la composition de la batterie."
+      ],
+      "answer": "CYMBALE",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    }
+  ],
+  "2026-02-10": [
+    {
+      "category": "Astronomie",
+      "categoryIcon": "🌌",
+      "clues": [
+        "Cet alcool est habituellement produit à partir de céréales (seigle, blé) et de pommes de terre.",
+        "C'est l'alcool national de la Russie.",
+        "On consomme souvent la V_________ avec un morceau de cornichon ou en cocktail, avec du jus de canneberges."
+      ],
+      "answer": "VODKA",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    },
+    {
+      "category": "Concept",
+      "categoryIcon": "💡",
+      "clues": [
+        "Mobile d'ordre psychologique, qui donne une raison d'agir ou de réagir.",
+        "En art, il s'agit d'un ornement isolé ou répété, servant de thème décoratif.",
+        "\"M______\" est synonyme de mobile, motivation, prétexte ou raison."
+      ],
+      "answer": "MOTIF",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    },
+    {
+      "category": "Animaux",
+      "categoryIcon": "🦁",
+      "clues": [
+        "Ce carnivore de la famille des mustélidés, doté de moustaches rigides, adore jouer avec ses proies.",
+        "Petit mammifère à pelage brun épais et court, à pattes palmées, adapté à la vie aquatique.",
+        "La L_______ se nourrit de poissons et de gibier d'eau et peut rester jusqu'à huit minutes en apnée sous l'eau."
+      ],
+      "answer": "LOUTRE",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    }
+  ],
+  "2026-02-11": [
+    {
+      "category": "Musique",
+      "categoryIcon": "🎵",
+      "clues": [
+        "Le deuxième album de ce groupe originaire de l'État de Washington a été l'un des plus vendus au monde, avec plus de 30 millions de d'exemplaires.",
+        "Après la parution de son premier album en 1989, la formation se stabilise avec l'arrivée de Dave Grohl comme batteur.",
+        "Smell Like Teen Spirits et Come as You Are sont certains des singles les plus connus du groupe."
+      ],
+      "answer": "NIRVANA",
+      "points": [
+        5,
+        3,
+        1
+      ]
+    }

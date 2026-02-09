@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Quotidien</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;900&family=Baloo+2:wght@700;800&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Quicksand', sans-serif; }
+    .answer-font { font-family: 'Baloo 2', cursive; font-weight: 800; }
+    .min-h-screen { min-height: 100vh; }
+    .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+    .from-amber-50 { --tw-gradient-from: #fffbeb; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 251, 235, 0)); }
+    .via-orange-50 { --tw-gradient-stops: var(--tw-gradient-from), #fff7ed, var(--tw-gradient-to, rgba(255, 247, 237, 0)); }
+    .to-yellow-50 { --tw-gradient-to: #fefce8; }
+    .p-3 { padding: 0.75rem; } .p-4 { padding: 1rem; } .p-5 { padding: 1.25rem; } .p-6 { padding: 1.5rem; } .p-8 { padding: 2rem; }
+    .pt-6 { padding-top: 1.5rem; } .pt-1 { padding-top: 0.25rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; } .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; } .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; } .px-8 { padding-left: 2rem; padding-right: 2rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; } .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .mb-1 { margin-bottom: 0.25rem; } .mb-2 { margin-bottom: 0.5rem; } .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; } .mb-5 { margin-bottom: 1.25rem; } .mb-6 { margin-bottom: 1.5rem; }
+    .mt-1 { margin-top: 0.25rem; } .mt-2 { margin-top: 0.5rem; } .mt-3 { margin-top: 0.75rem; } .mt-4 { margin-top: 1rem; }
+    .mr-2 { margin-right: 0.5rem; } .ml-2 { margin-left: 0.5rem; }
+    .max-w-2xl { max-width: 42rem; } .max-w-lg { max-width: 32rem; } .mx-auto { margin-left: auto; margin-right: auto; }
+    .text-center { text-align: center; }
+    .text-4xl { font-size: 2.25rem; line-height: 2.5rem; } .text-3xl { font-size: 1.875rem; line-height: 2.25rem; } .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .text-xl { font-size: 1.25rem; line-height: 1.75rem; } .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-base { font-size: 1rem; line-height: 1.5rem; } .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .font-black { font-weight: 900; } .font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
+    .tracking-tight { letter-spacing: -0.025em; } .uppercase { text-transform: uppercase; }
+    .text-amber-900 { color: #78350f; } .text-amber-800 { color: #92400e; } .text-amber-700 { color: #b45309; }
+    .text-amber-600 { color: #d97706; } .text-gray-800 { color: #1f2937; } .text-gray-600 { color: #4b5563; }
+    .text-gray-500 { color: #6b7280; } .text-gray-400 { color: #9ca3af; } .text-gray-300 { color: #d1d5db; }
+    .text-white { color: #ffffff; }
+    .text-green-800 { color: #166534; } .text-green-600 { color: #16a34a; } .text-green-900 { color: #14532d; }
+    .text-red-800 { color: #991b1b; }
+    .text-purple-600 { color: #9333ea; } .text-purple-900 { color: #581c87; }
+    .text-blue-900 { color: #1e3a8a; } .text-orange-900 { color: #7c2d12; }
+    .bg-white { background-color: #ffffff; } .bg-amber-50 { background-color: #fffbeb; }
+    .bg-amber-500 { background-color: #f59e0b; } .bg-gray-50 { background-color: #f9fafb; }
+    .bg-gray-100 { background-color: #f3f4f6; } .bg-gray-200 { background-color: #e5e7eb; }
+    .bg-gray-500 { background-color: #6b7280; } .bg-green-100 { background-color: #dcfce7; }
+    .bg-green-500 { background-color: #22c55e; } .bg-red-100 { background-color: #fee2e2; }
+    .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
+    .from-yellow-100 { --tw-gradient-from: #fef9c3; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(254, 249, 195, 0)); }
+    .to-amber-100 { --tw-gradient-to: #fef3c7; }
+    .from-amber-100 { --tw-gradient-from: #fef3c7; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(254, 243, 199, 0)); }
+    .to-orange-100 { --tw-gradient-to: #ffedd5; }
+    .from-amber-500 { --tw-gradient-from: #f59e0b; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(245, 158, 11, 0)); }
+    .to-orange-500 { --tw-gradient-to: #f97316; }
+    .from-amber-600 { --tw-gradient-from: #d97706; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(217, 119, 6, 0)); }
+    .to-orange-600 { --tw-gradient-to: #ea580c; }
+    .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0)); }
+    .to-indigo-500 { --tw-gradient-to: #6366f1; }
+    .from-blue-600 { --tw-gradient-from: #2563eb; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(37, 99, 235, 0)); }
+    .to-indigo-600 { --tw-gradient-to: #4f46e5; }
+    .from-green-50 { --tw-gradient-from: #f0fdf4; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(240, 253, 244, 0)); }
+    .to-emerald-50 { --tw-gradient-to: #ecfdf5; }
+    .from-green-100 { --tw-gradient-from: #dcfce7; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(220, 252, 231, 0)); }
+    .to-emerald-100 { --tw-gradient-to: #d1fae5; }
+    .from-green-500 { --tw-gradient-from: #22c55e; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(34, 197, 94, 0)); }
+    .to-green-600 { --tw-gradient-to: #16a34a; }
+    .from-orange-100 { --tw-gradient-from: #ffedd5; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 237, 213, 0)); }
+    .from-purple-100 { --tw-gradient-from: #f3e8ff; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(243, 232, 255, 0)); }
+    .to-pink-100 { --tw-gradient-to: #fce7f3; }
+    .from-blue-100 { --tw-gradient-from: #dbeafe; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(219, 234, 254, 0)); }
+    .to-indigo-100 { --tw-gradient-to: #e0e7ff; }
+    .from-red-50 { --tw-gradient-from: #fef2f2; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(254, 242, 242, 0)); }
+    .from-gray-500 { --tw-gradient-from: #6b7280; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(107, 114, 128, 0)); }
+    .to-gray-600 { --tw-gradient-to: #4b5563; }
+    .from-gray-600 { --tw-gradient-from: #4b5563; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(75, 85, 99, 0)); }
+    .to-gray-700 { --tw-gradient-to: #374151; }
+    .border { border-width: 1px; } .border-2 { border-width: 2px; } .border-3 { border-width: 3px; } .border-4 { border-width: 4px; }
+    .border-amber-200 { border-color: #fde68a; } .border-amber-300 { border-color: #fcd34d; }
+    .border-amber-400 { border-color: #fbbf24; } .border-orange-400 { border-color: #fb923c; }
+    .border-gray-200 { border-color: #e5e7eb; } .border-gray-300 { border-color: #d1d5db; }
+    .border-green-400 { border-color: #4ade80; } .border-green-500 { border-color: #22c55e; }
+    .border-red-400 { border-color: #f87171; } .border-red-500 { border-color: #ef4444; }
+    .border-purple-400 { border-color: #c084fc; } .border-blue-400 { border-color: #60a5fa; }
+    .rounded-xl { border-radius: 0.75rem; } .rounded-2xl { border-radius: 1rem; } .rounded-3xl { border-radius: 1.5rem; }
+    .rounded-lg { border-radius: 0.5rem; } .rounded-md { border-radius: 0.375rem; } .rounded-full { border-radius: 9999px; }
+    .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+    .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    .flex { display: flex; } .inline-block { display: inline-block; } .inline-flex { display: inline-flex; }
+    .flex-col { flex-direction: column; }
+    .gap-1 { gap: 0.25rem; } .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; }
+    .justify-center { justify-content: center; } .justify-between { justify-content: space-between; }
+    .items-center { align-items: center; } .items-start { align-items: flex-start; } .items-stretch { align-items: stretch; }
+    .flex-shrink-0 { flex-shrink: 0; } .flex-wrap { flex-wrap: wrap; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    .w-7 { width: 1.75rem; } .h-7 { height: 1.75rem; }
+    .w-10 { width: 2.5rem; } .h-10 { height: 2.5rem; }
+    .w-12 { width: 3rem; } .h-12 { height: 3rem; }
+    .w-14 { width: 3.5rem; } .h-14 { height: 3.5rem; }
+    .w-full { width: 100%; }
+    .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .duration-150 { transition-duration: 150ms; }
+    .scale-110 { transform: scale(1.1); } .hover\:scale-105:hover { transform: scale(1.05); }
+    .hover\:border-amber-400:hover { border-color: #fbbf24; } .hover\:border-orange-400:hover { border-color: #fb923c; }
+    .hover\:from-amber-600:hover { --tw-gradient-from: #d97706; } .hover\:to-orange-600:hover { --tw-gradient-to: #ea580c; }
+    .hover\:from-blue-600:hover { --tw-gradient-from: #2563eb; } .hover\:to-indigo-600:hover { --tw-gradient-to: #4f46e5; }
+    .hover\:from-gray-600:hover { --tw-gradient-from: #4b5563; } .hover\:to-gray-700:hover { --tw-gradient-to: #374151; }
+    .hover\:from-green-600:hover { --tw-gradient-from: #16a34a; } .hover\:to-green-700:hover { --tw-gradient-to: #15803d; }
+    .hover\:bg-gray-200:hover { background-color: #e5e7eb; } .hover\:bg-gray-300:hover { background-color: #d1d5db; }
+    .opacity-50 { opacity: 0.5; } .opacity-40 { opacity: 0.4; } .opacity-30 { opacity: 0.3; }
+    .cursor-not-allowed { cursor: not-allowed; } .cursor-pointer { cursor: pointer; }
+    .relative { position: relative; } .absolute { position: absolute; } .fixed { position: fixed; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .z-50 { z-index: 50; }
+    .line-through { text-decoration: line-through; }
+    .bg-opacity-50 { background-color: rgba(0, 0, 0, 0.5); }
+    .max-h-screen { max-height: 100vh; }
+    .overflow-y-auto { overflow-y: auto; }
+    .min-w-\[140px\] { min-width: 140px; }
+    button { cursor: pointer; border: none; outline: none; }
+    input { outline: none; }
+    input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.1); }
+    input:disabled { cursor: not-allowed; }
+    @keyframes scoreIncrease { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: #15803d; } 100% { transform: scale(1); } }
+    .score-animation { animation: scoreIncrease 0.6s ease-in-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-up { animation: slideUp 0.3s ease-out; }
+    .calendar-popup { 
+      position: absolute; 
+      top: 100%; 
+      left: 0; 
+      margin-top: 0.5rem; 
+      background: white; 
+      border-radius: 0.5rem; 
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+      padding: 1rem; 
+      z-index: 50; 
+      min-width: 200px;
+    }
+    @media (max-width: 640px) {
+      .calendar-popup {
+        top: auto;
+        bottom: 100%;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+      }
+      .calendar-popup .today-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+      }
+      .text-4xl { font-size: 1.875rem; line-height: 2.25rem; }
+      .text-2xl { font-size: 1.25rem; line-height: 1.75rem; }
+      .text-xl { font-size: 1.125rem; line-height: 1.75rem; }
+      .text-lg { font-size: 1rem; line-height: 1.5rem; }
+      .text-base { font-size: 0.875rem; line-height: 1.25rem; }
+      .p-6 { padding: 1.25rem; } .p-4 { padding: 0.875rem; }
+      .px-6 { padding-left: 1rem; padding-right: 1rem; }
+      .px-5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+      .px-3 { padding-left: 0.5rem; padding-right: 0.5rem; }
+      .px-2 { padding-left: 0.375rem; padding-right: 0.375rem; }
+      .py-3 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+      .py-2 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+      .gap-3 { gap: 0.5rem; } .gap-2 { gap: 0.375rem; } .gap-1 { gap: 0.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const storage = {
+      get: async (key) => {
+        const value = localStorage.getItem(key);
+        return value ? { key, value, shared: false } : null;
+      },
+      set: async (key, value) => {
+        localStorage.setItem(key, value);
+        return { key, value, shared: false };
+      }
+    };
+
+    function DailyQuiz() {
+      const getTodayStr = () => {
+        const now = new Date();
+        const montrealTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Montreal' }));
+        const year = montrealTime.getFullYear();
+        const month = String(montrealTime.getMonth() + 1).padStart(2, '0');
+        const day = String(montrealTime.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      const todayStr = getTodayStr();
+      
+      // TOUS LES HOOKS DOIVENT ÊTRE DÉCLARÉS AVANT TOUT RETURN
+      const [selectedDate, setSelectedDate] = useState(todayStr);
+      const [showCalendar, setShowCalendar] = useState(false);
+      const [allQuestions, setAllQuestions] = useState({});
+      const [loading, setLoading] = useState(true);
+      const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+      const [totalScore, setTotalScore] = useState(0);
+      const [todayScore, setTodayScore] = useState(0);
+      const [showScoreAnimation, setShowScoreAnimation] = useState(false);
+      const [answeredCount, setAnsweredCount] = useState(0);
+      const [ratio, setRatio] = useState(0);
+      const [userAnswer, setUserAnswer] = useState(Array(9).fill(''));
+      const [currentClue, setCurrentClue] = useState(0);
+      const [isComplete, setIsComplete] = useState(false);
+      const [questionScore, setQuestionScore] = useState(0);
+      const [wrongAnswers, setWrongAnswers] = useState([]);
+      const [showError, setShowError] = useState(false);
+      const [errorMessage, setErrorMessage] = useState('');
+      const [showStatsModal, setShowStatsModal] = useState(false);
+      const [isInitialLoad, setIsInitialLoad] = useState(true);
+      const [stats, setStats] = useState({
+        totalScore: 0,
+        ratio: 0,
+        totalAnswered: 0,
+        streak1Clue: 0,
+        streak2Clues: 0
+      });
+      
+      const clueRefs = useRef([]);
+      const inputRefs = useRef([]);
+      const nextQuestionBtnRef = useRef(null);
+      const scoreHeaderRef = useRef(null);
+      
+      const isToday = selectedDate === todayStr;
+      const dailyQuestions = allQuestions[selectedDate] || [];
+      const question = dailyQuestions[currentQuestionIndex];
+
+      // Load questions from JSON file
+      useEffect(() => {
+        fetch('questions.json')
+          .then(res => {
+            if (!res.ok) throw new Error('Impossible de charger les questions');
+            return res.json();
+          })
+          .then(data => {
+            setAllQuestions(data);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Erreur chargement questions:', err);
+            setLoading(false);
+          });
+      }, []);
+
+      useEffect(() => {
+        // Don't force scroll on page load
+        
+        const handleClickOutside = (event) => {
+          if (showCalendar && !event.target.closest('.calendar-container')) {
+            setShowCalendar(false);
+          }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+      }, [showCalendar]);
+
+      useEffect(() => {
+        const loadProgress = async () => {
+          try {
+            // Load all-time total score from localStorage
+            let allTimeTotal = 0;
+            const allKeys = Object.keys(localStorage);
+            
+            allKeys.forEach(key => {
+              if (key.startsWith('quiz-') && key.includes('-') && !key.includes('total') && !key.includes('current-index') && !key.includes('answered-count')) {
+                try {
+                  const data = JSON.parse(localStorage.getItem(key));
+                  if (data && data.isComplete && data.questionScore) {
+                    allTimeTotal += data.questionScore;
+                  }
+                } catch (e) {}
+              }
+            });
+            
+            setTotalScore(allTimeTotal);
+            
+            // Load today's score separately
+            let todayTotal = 0;
+            dailyQuestions.forEach((q, idx) => {
+              const key = `quiz-${todayStr}-${idx}`;
+              const savedData = localStorage.getItem(key);
+              if (savedData) {
+                try {
+                  const data = JSON.parse(savedData);
+                  if (data.isComplete && data.questionScore) {
+                    todayTotal += data.questionScore;
+                  }
+                } catch (e) {}
+              }
+            });
+            
+            setTodayScore(todayTotal);
+
+            const answeredCountData = await storage.get('quiz-answered-count');
+            if (answeredCountData && answeredCountData.value) {
+              setAnsweredCount(JSON.parse(answeredCountData.value));
+            }
+
+            if (isToday) {
+              const currentIndexData = await storage.get(`quiz-current-index-${todayStr}`);
+              if (currentIndexData && currentIndexData.value) {
+                setCurrentQuestionIndex(JSON.parse(currentIndexData.value));
+              }
+            }
+          } catch (error) {
+            console.log('No saved progress');
+          }
+        };
+        loadProgress();
+      }, [todayStr, isToday, dailyQuestions]);
+
+      useEffect(() => {
+        if (!question) return;
+        
+        const loadQuestionProgress = async () => {
+          try {
+            const savedData = await storage.get(`quiz-${selectedDate}-${currentQuestionIndex}`);
+            if (savedData && savedData.value) {
+              const data = JSON.parse(savedData.value);
+              let answerArray = data.userAnswer || Array(9).fill('');
+              
+              setUserAnswer(answerArray);
+              setCurrentClue(data.currentClue || 0);
+              setIsComplete(data.isComplete || false);
+              setQuestionScore(data.questionScore || 0);
+              setWrongAnswers(data.wrongAnswers || []);
+            } else {
+              setUserAnswer(Array(9).fill(''));
+              setCurrentClue(0);
+              setIsComplete(false);
+              setQuestionScore(0);
+              setWrongAnswers([]);
+            }
+            
+            calculateAndUpdateRatio();
+            
+            // Focus on first available input - but NOT on initial page load for mobile
+            setTimeout(() => {
+              const isMobile = window.innerWidth <= 640;
+              if (!savedData?.value || !JSON.parse(savedData.value).isComplete) {
+                if (!isInitialLoad || !isMobile) {
+                  const firstAvailable = 0;
+                  if (inputRefs.current[firstAvailable]) {
+                    inputRefs.current[firstAvailable].focus();
+                  }
+                }
+              }
+              setIsInitialLoad(false);
+            }, 150);
+          } catch (error) {
+            setUserAnswer(Array(9).fill(''));
+            setCurrentClue(0);
+            setIsComplete(false);
+            setQuestionScore(0);
+            setWrongAnswers([]);
+            
+            // Focus even on error - but not on mobile initial load
+            setTimeout(() => {
+              const isMobile = window.innerWidth <= 640;
+              if (!isInitialLoad || !isMobile) {
+                if (inputRefs.current[0]) {
+                  inputRefs.current[0].focus();
+                }
+              }
+              setIsInitialLoad(false);
+            }, 150);
+          }
+        };
+        loadQuestionProgress();
+      }, [currentQuestionIndex, selectedDate, question]);
+
+      useEffect(() => {
+        setCurrentQuestionIndex(0);
+      }, [selectedDate]);
+
+      useEffect(() => {
+        if (!question) return;
+        
+        // Scroll to new clue on mobile when it appears - clue 1 and 2 only
+        if (window.innerWidth <= 640 && currentClue > 0 && currentClue < 2 && clueRefs.current[currentClue]) {
+          setTimeout(() => {
+            clueRefs.current[currentClue]?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start'
+            });
+          }, 200);
+        }
+        
+        // Re-focus input when clue changes
+        if (!isComplete) {
+          setTimeout(() => {
+            if (inputRefs.current[0]) {
+              inputRefs.current[0].focus();
+            }
+          }, 250);
+        }
+      }, [currentClue, question, isComplete]);
+
+      useEffect(() => {
+        if (!question) return;
+        
+        const saveProgress = async () => {
+          try {
+            await storage.set(`quiz-${selectedDate}-${currentQuestionIndex}`, JSON.stringify({
+              userAnswer,
+              currentClue,
+              isComplete,
+              questionScore,
+              wrongAnswers
+            }));
+            
+            if (isToday) {
+              await storage.set(`quiz-current-index-${todayStr}`, JSON.stringify(currentQuestionIndex));
+            }
+          } catch (error) {
+            console.error('Failed to save progress');
+          }
+        };
+        saveProgress();
+      }, [userAnswer, currentClue, isComplete, questionScore, totalScore, wrongAnswers, currentQuestionIndex, selectedDate, isToday, todayStr, question]);
+
+      const calculateStats = () => {
+        let totalPts = 0;
+        let totalPossible = 0;
+        let answered = 0;
+        
+        // Get all quiz entries and sort by date
+        const allEntries = [];
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('quiz-') && key.includes('-') && !key.includes('total') && !key.includes('current-index') && !key.includes('answered-count')) {
+            const parts = key.split('-');
+            if (parts.length >= 4) {
+              const date = `${parts[1]}-${parts[2]}-${parts[3]}`;
+              const questionIndex = parseInt(parts[4]);
+              try {
+                const data = JSON.parse(localStorage.getItem(key));
+                if (data && data.isComplete) {
+                  allEntries.push({
+                    date,
+                    questionIndex,
+                    score: data.questionScore || 0,
+                    cluesUsed: data.currentClue + 1
+                  });
+                  totalPts += data.questionScore || 0;
+                  totalPossible += 5; // Max points per question
+                  answered++;
+                }
+              } catch (e) {}
+            }
+          }
+        });
+        
+        // Sort by date then question index
+        allEntries.sort((a, b) => {
+          if (a.date === b.date) return a.questionIndex - b.questionIndex;
+          return a.date.localeCompare(b.date);
+        });
+        
+        // Calculate streaks
+        let current1Streak = 0;
+        let max1Streak = 0;
+        let current2Streak = 0;
+        let max2Streak = 0;
+        
+        allEntries.forEach(entry => {
+          // Streak for 1 clue (5 points)
+          if (entry.cluesUsed === 1) {
+            current1Streak++;
+            max1Streak = Math.max(max1Streak, current1Streak);
+          } else {
+            current1Streak = 0;
+          }
+          
+          // Streak for 2 clues or less (3 or 5 points)
+          if (entry.cluesUsed <= 2) {
+            current2Streak++;
+            max2Streak = Math.max(max2Streak, current2Streak);
+          } else {
+            current2Streak = 0;
+          }
+        });
+        
+        const ratioCalc = totalPossible > 0 ? Math.round((totalPts / totalPossible) * 100) : 0;
+        
+        setStats({
+          totalScore: totalPts,
+          ratio: ratioCalc,
+          totalAnswered: answered,
+          streak1Clue: max1Streak,
+          streak2Clues: max2Streak
+        });
+      };
+
+      const calculateAndUpdateRatio = () => {
+        // Calculate ratio based on ALL answered questions ever
+        let totalEarnedPoints = 0;
+        let totalPossibleFromAnswered = 0;
+        
+        const allKeys = Object.keys(localStorage).filter(k => k.startsWith('quiz-'));
+        
+        allKeys.forEach(key => {
+          if (key.startsWith('quiz-') && key.includes('-') && !key.includes('total') && !key.includes('current-index')) {
+            try {
+              const data = JSON.parse(localStorage.getItem(key));
+              if (data && data.isComplete && data.questionScore) {
+                totalEarnedPoints += data.questionScore;
+                totalPossibleFromAnswered += 5; // Max points per question
+              }
+            } catch (e) {}
+          }
+        });
+
+        if (totalPossibleFromAnswered === 0) {
+          setRatio(0);
+        } else {
+          setRatio(Math.round((totalEarnedPoints / totalPossibleFromAnswered) * 100));
+        }
+      };
+
+      const handleInputChange = (index, value) => {
+        if (isComplete || !question) return;
+        
+        const letter = value.toUpperCase().replace(/[^A-ZÀ-ÿ]/g, '');
+        if (letter.length > 1) return;
+        
+        const newAnswer = [...userAnswer];
+        newAnswer[index] = letter;
+        setUserAnswer(newAnswer);
+
+        if (inputRefs.current[index]) {
+          inputRefs.current[index].classList.add('scale-110');
+          setTimeout(() => {
+            inputRefs.current[index]?.classList.remove('scale-110');
+          }, 150);
+        }
+
+        if (letter && index < 8) {
+          setTimeout(() => {
+            inputRefs.current[index + 1]?.focus();
+          }, 50);
+        }
+      };
+
+      const handleKeyDown = (index, e) => {
+        if (!question) return;
+        
+        // If complete and user presses Enter, go to next question
+        if (isComplete && e.key === 'Enter') {
+          e.preventDefault();
+          if (currentQuestionIndex < dailyQuestions.length - 1) {
+            goToNextQuestion();
+          }
+          return;
+        }
+        
+        if (isComplete) return;
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          checkAnswer();
+        } else if (e.key === 'Backspace') {
+          e.preventDefault();
+          if (userAnswer[index]) {
+            const newAnswer = [...userAnswer];
+            newAnswer[index] = '';
+            setUserAnswer(newAnswer);
+          } else if (index > 0) {
+            const newAnswer = [...userAnswer];
+            newAnswer[index - 1] = '';
+            setUserAnswer(newAnswer);
+            setTimeout(() => {
+              inputRefs.current[index - 1]?.focus();
+            }, 50);
+          }
+        } else if (e.key === 'Tab') {
+          e.preventDefault();
+          inputRefs.current[0]?.focus();
+        } else if (e.key === 'ArrowLeft' && index > 0) {
+          inputRefs.current[index - 1]?.focus();
+        } else if (e.key === 'ArrowRight' && index < 8) {
+          inputRefs.current[index + 1]?.focus();
+        }
+      };
+
+      const checkAnswer = () => {
+        if (!question) return;
+        
+        const answer = userAnswer.join('').trim();
+        
+        if (answer.length === 0) {
+          setErrorMessage('Veuillez entrer une réponse');
+          setShowError(true);
+          setTimeout(() => setShowError(false), 3000);
+          return;
+        }
+        
+        if (wrongAnswers.includes(answer)) {
+          setErrorMessage('Vous avez déjà essayé cette réponse !');
+          setShowError(true);
+          setUserAnswer(Array(9).fill(''));
+          inputRefs.current[0]?.focus();
+          setTimeout(() => {
+            setShowError(false);
+          }, 3000);
+          return;
+        }
+        
+        const correct = answer === question.answer;
+        
+        if (correct && !isComplete) {
+          const points = question.points[currentClue];
+          setQuestionScore(points);
+          if (isToday) {
+            const newCount = answeredCount + 1;
+            setAnsweredCount(newCount);
+            storage.set('quiz-answered-count', JSON.stringify(newCount));
+            
+            setTotalScore(prev => prev + points);
+            setTodayScore(prev => prev + points);
+            setShowScoreAnimation(true);
+            setTimeout(() => setShowScoreAnimation(false), 600);
+          }
+          setIsComplete(true);
+          
+          setTimeout(() => {
+            calculateAndUpdateRatio();
+            
+            // Show stats modal if last question on today's quiz
+            if (currentQuestionIndex === dailyQuestions.length - 1 && isToday) {
+              setTimeout(() => {
+                calculateStats();
+                setShowStatsModal(true);
+              }, 800);
+            }
+            
+            // Scroll behavior for both mobile and desktop
+            if (currentQuestionIndex === dailyQuestions.length - 1) {
+              // Last question - scroll to score
+              setTimeout(() => {
+                scoreHeaderRef.current?.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start' 
+                });
+              }, 300);
+            } else {
+              // Not last question - scroll to next button
+              setTimeout(() => {
+                nextQuestionBtnRef.current?.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center' 
+                });
+              }, 300);
+            }
+          }, 100);
+        } else if (!correct && currentClue < question.clues.length - 1) {
+          setWrongAnswers(prev => [...prev, answer]);
+          setUserAnswer(Array(9).fill(''));
+          setCurrentClue(currentClue + 1);
+          
+          setTimeout(() => {
+            inputRefs.current[0]?.focus();
+          }, 100);
+        } else {
+          setWrongAnswers(prev => [...prev, answer]);
+          setIsComplete(true);
+          
+          setTimeout(() => {
+            calculateAndUpdateRatio();
+            
+            // Show stats modal if last question on today's quiz
+            if (currentQuestionIndex === dailyQuestions.length - 1 && isToday) {
+              setTimeout(() => {
+                calculateStats();
+                setShowStatsModal(true);
+              }, 800);
+            }
+            
+            // Scroll behavior for wrong answer - both mobile and desktop
+            if (currentQuestionIndex === dailyQuestions.length - 1) {
+              setTimeout(() => {
+                scoreHeaderRef.current?.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start' 
+                });
+              }, 300);
+            } else {
+              setTimeout(() => {
+                nextQuestionBtnRef.current?.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center' 
+                });
+              }, 300);
+            }
+          }, 100);
+        }
+      };
+
+      const changeQuestion = (index) => {
+        setCurrentQuestionIndex(index);
+      };
+
+      const navigateDate = (direction) => {
+        const date = new Date(selectedDate + 'T00:00:00');
+        date.setDate(date.getDate() + direction);
+        const newDate = date.toISOString().split('T')[0];
+        if (allQuestions[newDate] && (direction === -1 || newDate <= todayStr)) {
+          setSelectedDate(newDate);
+        }
+      };
+
+      const goToNextQuestion = () => {
+        if (currentQuestionIndex < dailyQuestions.length - 1) {
+          setCurrentQuestionIndex(prev => prev + 1);
+        }
+      };
+
+      const formatDateForCalendar = (dateStr) => {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year.slice(2)}`;
+      };
+
+      const getPreviousDate = (dateStr) => {
+        const date = new Date(dateStr + 'T00:00:00');
+        date.setDate(date.getDate() - 1);
+        return date.toISOString().split('T')[0];
+      };
+
+      const getNextDate = (dateStr) => {
+        const date = new Date(dateStr + 'T00:00:00');
+        date.setDate(date.getDate() + 1);
+        return date.toISOString().split('T')[0];
+      };
+
+      const hasPreviousDate = () => {
+        return !!allQuestions[getPreviousDate(selectedDate)];
+      };
+
+      const hasNextDate = () => {
+        const nextDate = getNextDate(selectedDate);
+        return !!allQuestions[nextDate] && nextDate <= todayStr;
+      };
+
+      // MAINTENANT ON PEUT FAIRE LES RETURNS
+      if (loading) {
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4 flex items-center justify-center">
+            <div className="text-2xl font-bold text-amber-900">Chargement...</div>
+          </div>
+        );
+      }
+
+      if (dailyQuestions.length === 0 || !question) {
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4 flex items-center justify-center">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="bg-white rounded-2xl shadow-xl p-6">
+                <p className="text-2xl font-black text-amber-900 mb-4">📅 Aucun quiz disponible</p>
+                <p className="text-gray-600">Revenez plus tard pour de nouvelles questions!</p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-4 pt-6">
+              <h1 className="text-4xl font-black text-amber-900 mb-2 tracking-tight">
+                Quiz du Jour
+              </h1>
+              <p className="text-amber-700 text-base font-semibold">
+                {new Date(selectedDate + 'T00:00:00').toLocaleDateString('fr-FR', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+              {!isToday && (
+                <p className="text-amber-600 text-sm font-semibold mt-2">
+                  📚 Mode pratique - Les points ne comptent pas
+                </p>
+              )}
+            </div>
+
+            <div className="text-center mb-3">
+              <p className="text-xs text-gray-600 font-semibold">
+                Points par indice : <span className="text-green-600">5</span> / <span className="text-amber-600">3</span> / <span className="text-gray-600">1</span>
+              </p>
+            </div>
+
+            <div className="text-center mb-4" ref={scoreHeaderRef}>
+              <div className="flex gap-3 justify-center items-stretch flex-wrap">
+                {/* Total Score */}
+                <div className="inline-flex items-center gap-3 bg-gradient-to-r from-yellow-100 to-amber-100 px-6 py-3 rounded-2xl border-3 border-amber-400 shadow-lg">
+                  <span className={`text-2xl font-black text-amber-900 ${showScoreAnimation ? 'score-animation' : ''}`}>
+                    🏆 Total: {totalScore}
+                  </span>
+                  <div className="flex flex-col items-center">
+                    {ratio > 0 && (
+                      <span className="text-base font-semibold text-purple-600">
+                        {ratio}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Today's Points */}
+                {isToday && todayScore > 0 && (
+                  <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 px-5 py-3 rounded-2xl border-3 border-green-400 shadow-lg">
+                    <span className="text-lg font-black text-green-800">
+                      ⭐ Aujourd'hui: {todayScore}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mb-4">
+              <div className="relative calendar-container">
+                <button
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  className="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-bold transition-all hover:scale-105 shadow-md flex items-center justify-center text-2xl"
+                >
+                  📅
+                </button>
+                {showCalendar && (
+                  <div className="calendar-popup">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <button
+                        onClick={() => navigateDate(-1)}
+                        className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center transition-all"
+                        disabled={!hasPreviousDate()}
+                      >
+                        ◀
+                      </button>
+                      <div className="text-center font-bold text-gray-800">
+                        {formatDateForCalendar(selectedDate)}
+                      </div>
+                      <button
+                        onClick={() => navigateDate(1)}
+                        className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center transition-all"
+                        disabled={!hasNextDate()}
+                      >
+                        ▶
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-500 text-center mt-2">
+                      {isToday ? 'Aujourd\'hui' : 'Quiz du passé'}
+                    </div>
+                    {!isToday && (
+                      <button
+                        onClick={() => { setSelectedDate(todayStr); setShowCalendar(false); }}
+                        className="today-btn w-full mt-3 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-semibold text-sm hover:from-amber-600 hover:to-orange-600 transition-all"
+                      >
+                        AUJ.
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex gap-2">
+                {dailyQuestions.map((q, index) => (
+                  <button
+                    key={index}
+                    onClick={() => changeQuestion(index)}
+                    className={`px-5 py-2 rounded-xl font-bold text-base transition-all hover:scale-105 shadow-md ${
+                      currentQuestionIndex === index
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                        : 'bg-white text-amber-800 border-2 border-amber-300 hover:border-amber-400'
+                    }`}
+                  >
+                    Q{index + 1}
+                  </button>
+                ))}
+              </div>
+              
+              <div style={{width: '48px'}}></div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl p-6 border-4 border-amber-200 slide-up">
+              <div className="flex items-center justify-center gap-3 mb-5">
+                <span style={{fontSize: '2rem'}}>{question.categoryIcon}</span>
+                <h2 className="text-xl font-black text-amber-800">
+                  {question.category}
+                </h2>
+              </div>
+
+              <div className="text-center mb-5">
+                <div className="inline-block bg-gradient-to-r from-amber-100 to-orange-100 px-5 py-2 rounded-full border-2 border-amber-300">
+                  <span className="text-xl font-bold text-amber-900">
+                    Score: {questionScore}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                {question.clues.map((clue, index) => (
+                  <div
+                    key={index}
+                    ref={el => clueRefs.current[index] = el}
+                    className={`p-3 rounded-xl transition-all border-2 ${
+                      index <= currentClue && !isComplete
+                        ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300'
+                        : index <= currentClue && isComplete
+                        ? 'bg-gray-50 border-gray-200 opacity-40'
+                        : 'bg-gray-50 border-gray-200 opacity-50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        {index + 1}
+                      </span>
+                      <p className="text-gray-800 text-base pt-1 font-semibold">
+                        {index <= currentClue ? clue : (index === 1 ? '2e indice' : '3e indice')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-5 p-3 bg-amber-50 border-2 border-amber-200 rounded-xl">
+                <p className="text-center text-amber-800 font-semibold text-sm">
+                  💡 Entrez votre réponse (maximum 9 lettres)
+                </p>
+              </div>
+
+              {showError && (
+                <div className="mb-5 p-3 bg-red-100 border-2 border-red-400 rounded-xl">
+                  <p className="text-center text-red-800 font-bold text-sm">
+                    ⚠️ {errorMessage}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-1 justify-center mb-5">
+                {Array(9).fill(0).map((_, index) => {
+                  const isAnswerBox = index < question.answer.length;
+                  const isCrossed = !isAnswerBox && currentClue >= 2;
+                  
+                  return (
+                    <input
+                      key={index}
+                      ref={el => inputRefs.current[index] = el}
+                      type="text"
+                      maxLength="1"
+                      value={userAnswer[index]}
+                      onChange={(e) => handleInputChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      disabled={isComplete}
+                      className={`answer-font w-10 h-10 text-center text-2xl uppercase rounded-md transition-all duration-150 border
+                        ${isCrossed
+                          ? 'bg-gray-100 border-gray-200 text-gray-300 line-through cursor-not-allowed'
+                          : isComplete && index < question.answer.length && userAnswer[index] === question.answer[index]
+                          ? 'bg-green-100 border-green-500 text-green-800 border-2'
+                          : isComplete && index < question.answer.length && userAnswer[index] && userAnswer[index] !== question.answer[index]
+                          ? 'bg-red-100 border-red-500 text-red-800 border-2'
+                          : 'bg-white border-gray-300 text-amber-900'
+                        } ${isComplete ? 'cursor-not-allowed' : isCrossed ? 'cursor-not-allowed' : 'hover:border-orange-400'}`}
+                      tabIndex={!isComplete ? 0 : -1}
+                    />
+                  );
+                })}
+              </div>
+
+              {!isComplete && (
+                <div className="flex gap-3 justify-center flex-wrap">
+                  <button
+                    onClick={checkAnswer}
+                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-base hover:from-amber-600 hover:to-orange-600 transition-all hover:scale-105 shadow-lg"
+                  >
+                    Vérifier
+                  </button>
+                  {currentClue < question.clues.length - 1 && (
+                    <button
+                      onClick={() => {
+                        // On mobile, validate answer first
+                        if (window.innerWidth <= 640) {
+                          checkAnswer();
+                        } else {
+                          setCurrentClue(currentClue + 1);
+                        }
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-bold text-base hover:from-blue-600 hover:to-indigo-600 transition-all hover:scale-105 shadow-lg"
+                    >
+                      {window.innerWidth <= 640 ? 'Suivant' : 'Passer et voir l\'indice suivant'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {isComplete && (
+                <div className="mt-5 text-center slide-up">
+                  <div className={`p-5 rounded-xl border-3 ${
+                    userAnswer.join('').trim() === question.answer
+                      ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-400'
+                      : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-400'
+                  }`}>
+                    <p className="text-xl font-black mb-2">
+                      {userAnswer.join('').trim() === question.answer
+                        ? '🎉 Bravo! Bonne réponse!'
+                        : '❌ Dommage! La réponse était:'}
+                    </p>
+                    {userAnswer.join('').trim() !== question.answer && (
+                      <p className="text-2xl font-black text-amber-900 mt-2">
+                        {question.answer}
+                      </p>
+                    )}
+                    {userAnswer.join('').trim() === question.answer && isToday && (
+                      <p className="text-lg font-bold text-amber-800 mt-3">
+                        Points gagnés: +{question.points[currentClue]}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {currentQuestionIndex < dailyQuestions.length - 1 && (
+                    <button
+                      ref={nextQuestionBtnRef}
+                      onClick={goToNextQuestion}
+                      className="mt-4 px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold text-base hover:from-green-600 hover:to-green-700 transition-all hover:scale-105 shadow-lg"
+                    >
+                      Question suivante →
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Statistics Modal */}
+          {showStatsModal && (
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowStatsModal(false)}
+            >
+              <div 
+                className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full"
+                style={{maxHeight: '90vh', overflowY: 'auto'}}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="text-3xl font-black text-amber-900 text-center mb-6">
+                  🎉 Statistiques
+                </h2>
+                
+                {/* Top: Total Score and Ratio */}
+                <div className="flex gap-3 justify-center mb-6 flex-wrap">
+                  <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-2xl p-4 border-3 border-amber-400 flex-1 min-w-[140px]">
+                    <div className="text-center">
+                      <div className="text-sm font-semibold text-gray-600 mb-1">Score Total</div>
+                      <div className="text-3xl font-black text-amber-900">{stats.totalScore}</div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-4 border-3 border-purple-400 flex-1 min-w-[140px]">
+                    <div className="text-center">
+                      <div className="text-sm font-semibold text-gray-600 mb-1">Ratio</div>
+                      <div className="text-3xl font-black text-purple-900">{stats.ratio}%</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Center: Total Answered */}
+                <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl p-6 border-3 border-blue-400 mb-6">
+                  <div className="text-center">
+                    <div className="text-base font-semibold text-gray-600 mb-2">Questions Répondues</div>
+                    <div className="text-4xl font-black text-blue-900">{stats.totalAnswered}</div>
+                  </div>
+                </div>
+                
+                {/* Bottom: Streaks */}
+                <div className="space-y-3 mb-6">
+                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-4 border-3 border-green-400">
+                    <div className="text-center">
+                      <div className="text-xs font-semibold text-gray-600 mb-1">🔥 Séquence 1 indice</div>
+                      <div className="text-2xl font-black text-green-900">{stats.streak1Clue}</div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-r from-orange-100 to-amber-100 rounded-2xl p-4 border-3 border-orange-400">
+                    <div className="text-center">
+                      <div className="text-xs font-semibold text-gray-600 mb-1">🔥 Séquence 2 indices max</div>
+                      <div className="text-2xl font-black text-orange-900">{stats.streak2Clues}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => setShowStatsModal(false)}
+                  className="w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-lg hover:from-amber-600 hover:to-orange-600 transition-all hover:scale-105 shadow-lg"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<DailyQuiz />);
+  </script>
+</body>
+</html>

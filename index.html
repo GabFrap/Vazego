@@ -181,7 +181,10 @@
       set: async (key, value) => {
         localStorage.setItem(key, value);
         return { key, value, shared: false };
-      }
+      },
+      // Version key for resetting data
+      VERSION_KEY: 'quiz-app-version',
+      CURRENT_VERSION: 'v7'
     };
 
     function DailyQuiz() {
@@ -235,6 +238,19 @@
 
       // Load questions from JSON file
       useEffect(() => {
+        // Check version and reset if needed
+        const savedVersion = localStorage.getItem(storage.VERSION_KEY);
+        if (savedVersion !== storage.CURRENT_VERSION) {
+          // Clear all quiz data on version change
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('quiz-')) {
+              localStorage.removeItem(key);
+            }
+          });
+          localStorage.setItem(storage.VERSION_KEY, storage.CURRENT_VERSION);
+          console.log('🔄 Data reset for new version');
+        }
+        
         fetch('questions.json')
           .then(res => {
             if (!res.ok) throw new Error('Impossible de charger les questions');
@@ -343,9 +359,14 @@
             
             calculateAndUpdateRatio();
             
+            // Scroll to top on mobile when question changes
+            const isMobile = window.innerWidth <= 640;
+            if (isMobile) {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
             // Focus on first available input - but NOT on initial page load for mobile
             setTimeout(() => {
-              const isMobile = window.innerWidth <= 640;
               if (!savedData?.value || !JSON.parse(savedData.value).isComplete) {
                 if (!isInitialLoad || !isMobile) {
                   const firstAvailable = 0;
@@ -355,7 +376,7 @@
                 }
               }
               setIsInitialLoad(false);
-            }, 150);
+            }, isMobile ? 400 : 150); // Longer delay on mobile for scroll to complete
           } catch (error) {
             setUserAnswer(Array(9).fill(''));
             setCurrentClue(0);
@@ -363,16 +384,21 @@
             setQuestionScore(0);
             setWrongAnswers([]);
             
+            // Scroll to top on mobile
+            const isMobile = window.innerWidth <= 640;
+            if (isMobile) {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
             // Focus even on error - but not on mobile initial load
             setTimeout(() => {
-              const isMobile = window.innerWidth <= 640;
               if (!isInitialLoad || !isMobile) {
                 if (inputRefs.current[0]) {
                   inputRefs.current[0].focus();
                 }
               }
               setIsInitialLoad(false);
-            }, 150);
+            }, isMobile ? 400 : 150);
           }
         };
         loadQuestionProgress();
@@ -385,18 +411,24 @@
       useEffect(() => {
         if (!question) return;
         
-        // Scroll to new clue on mobile when it appears - clue 1 and 2 only
-        if (window.innerWidth <= 640 && currentClue > 0 && currentClue < 2 && clueRefs.current[currentClue]) {
+        // Scroll to new clue on mobile when it appears - clues 2 and 3
+        if (window.innerWidth <= 640 && (currentClue === 1 || currentClue === 2) && clueRefs.current[currentClue]) {
           setTimeout(() => {
+            // Scroll the clue to top of viewport
             clueRefs.current[currentClue]?.scrollIntoView({ 
               behavior: 'smooth', 
-              block: 'start'
+              block: 'start' 
             });
-          }, 200);
-        }
-        
-        // Re-focus input when clue changes
-        if (!isComplete) {
+            
+            // Then focus first input after another delay to ensure keyboard doesn't override scroll
+            setTimeout(() => {
+              if (!isComplete && inputRefs.current[0]) {
+                inputRefs.current[0].focus();
+              }
+            }, 400);
+          }, 300);
+        } else if (!isComplete) {
+          // Re-focus input when clue changes on desktop
           setTimeout(() => {
             if (inputRefs.current[0]) {
               inputRefs.current[0].focus();
@@ -775,7 +807,18 @@
         <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-4 pt-6">
-              <h1 className="text-4xl font-black text-amber-900 mb-2 tracking-tight">
+              <h1 
+                className="text-4xl font-black text-amber-900 mb-2 tracking-tight"
+                onClick={(e) => {
+                  if (e.detail === 3) { // Triple-clic
+                    if (confirm('🔧 Mode développeur : Réinitialiser TOUT le localStorage ?')) {
+                      localStorage.clear();
+                      window.location.reload();
+                    }
+                  }
+                }}
+                style={{cursor: 'default', userSelect: 'none'}}
+              >
                 Quiz du Jour
               </h1>
               <p className="text-amber-700 text-base font-semibold">
@@ -831,6 +874,7 @@
                 <button
                   onClick={() => setShowCalendar(!showCalendar)}
                   className="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-bold transition-all hover:scale-105 shadow-md flex items-center justify-center text-2xl"
+                  title="Calendrier"
                 >
                   📅
                 </button>
@@ -922,8 +966,7 @@
                       <span className="flex-shrink-0 w-7 h-7 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                         {index + 1}
                       </span>
-                      <p className="text-gray-800 text-base pt-1 font-semibold">
-                        {index <= currentClue ? clue : (index === 1 ? '2e indice' : '3e indice')}
+                      <p className="text-gray-800 text-base pt-1 font-semibold" dangerouslySetInnerHTML={{__html: index <= currentClue ? clue : (index === 1 ? '2e indice' : '3e indice')}}>
                       </p>
                     </div>
                   </div>
@@ -959,7 +1002,7 @@
                       onChange={(e) => handleInputChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       disabled={isComplete}
-                      className={`answer-font w-10 h-10 text-center text-2xl uppercase rounded-md transition-all duration-150 border
+                      className={`answer-font w-9 h-9 text-center text-2xl uppercase rounded-md transition-all duration-150 border
                         ${isCrossed
                           ? 'bg-gray-100 border-gray-200 text-gray-300 line-through cursor-not-allowed'
                           : isComplete && index < question.answer.length && userAnswer[index] === question.answer[index]
@@ -984,17 +1027,10 @@
                   </button>
                   {currentClue < question.clues.length - 1 && (
                     <button
-                      onClick={() => {
-                        // On mobile, validate answer first
-                        if (window.innerWidth <= 640) {
-                          checkAnswer();
-                        } else {
-                          setCurrentClue(currentClue + 1);
-                        }
-                      }}
+                      onClick={checkAnswer}
                       className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-bold text-base hover:from-blue-600 hover:to-indigo-600 transition-all hover:scale-105 shadow-lg"
                     >
-                      {window.innerWidth <= 640 ? 'Suivant' : 'Passer et voir l\'indice suivant'}
+                      Suivant
                     </button>
                   )}
                 </div>

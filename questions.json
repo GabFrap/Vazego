@@ -15,9 +15,9 @@
       "category": "Cinéma",
       "categoryIcon": "🎬",
       "clues": [
-        "Ce réalisateur américain est le fondateur de la Word Cinema Foundation et le président de la Film Foundation. (nom de famille)",
-        "Il a obtenu la Palme d'or au Festival de Cannes en 1976 pour Taxi Driver.",
-        "Martin ___________ a aussi réalisé Gangs of New York, Shutter Island et The Wolf of Wall Street."
+        "Ce réalisateur américain né en 1942 de parents d'origine sicilienne obtient son premier succès critique avec le film <i>Mean Streets</i>, en 1973. (nom de famille)",
+        "Il obtient la Palme d'or au Festival de Cannes en 1976 pour <i>Taxi Driver</i>.",
+        "Martin ___________ a aussi réalisé <i>Gangs of New York</i>, <i>Shutter Island</i> et <i>The Wolf of Wall Street</i>."
       ],
       "answer": "SCORCESE",
       "points": [5, 3, 1]
@@ -51,7 +51,7 @@
       "categoryIcon": "📚",
       "clues": [
         "Cette autrice belge prolifique publie un roman par an depuis 1992. (nom de famille)",
-        "Elle a publié Hygiène de l'Assassin et les Catilinaires.",
+        "Elle a publié <i>Hygiène de l'Assassin</i> et <i>Les Catilinaires</i>.",
         "Dans Métaphysique des tubes, Amélie _______ raconte les trois premières années de sa vie au Japon."
       ],
       "answer": "NOTHOMB",

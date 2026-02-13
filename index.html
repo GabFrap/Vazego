@@ -417,36 +417,27 @@
         
         // Scroll behavior for mobile when clues change
         if (window.innerWidth <= 640 && !isComplete) {
-          // For clues 2 and 3 (index 1 and 2), scroll to show the clue with boxes underneath
-          if (currentClue === 1 || currentClue === 2) {
-            setTimeout(() => {
-              const clueElement = clueRefs.current[currentClue];
-              if (clueElement) {
-                // Scroll so the clue appears near top with room for input boxes below
-                const elementTop = clueElement.getBoundingClientRect().top + window.scrollY;
-                const offset = 120; // Offset from top to leave room for header
-                
-                window.scrollTo({ 
-                  top: elementTop - offset, 
-                  behavior: 'smooth' 
-                });
-                
-                // Focus after scroll completes
-                setTimeout(() => {
-                  if (inputRefs.current[0]) {
-                    inputRefs.current[0].focus();
-                  }
-                }, 500);
-              }
-            }, 200);
-          } else if (currentClue === 0) {
-            // For first clue, just focus without scroll
-            setTimeout(() => {
-              if (inputRefs.current[0]) {
-                inputRefs.current[0].focus();
-              }
-            }, 250);
-          }
+          setTimeout(() => {
+            const clueElement = clueRefs.current[currentClue];
+            if (clueElement) {
+              // Scroll so ONLY the current clue is visible with boxes directly underneath
+              // This hides the clues that come after
+              const elementTop = clueElement.getBoundingClientRect().top + window.scrollY;
+              const offset = 80; // Small offset from top (just below category/score)
+              
+              window.scrollTo({ 
+                top: elementTop - offset, 
+                behavior: 'smooth' 
+              });
+              
+              // Focus after scroll completes
+              setTimeout(() => {
+                if (inputRefs.current[0]) {
+                  inputRefs.current[0].focus();
+                }
+              }, 500);
+            }
+          }, 200);
         } else if (!isComplete) {
           // Desktop - just re-focus
           setTimeout(() => {
@@ -619,6 +610,7 @@
         if (e.key === 'Enter') {
           e.preventDefault();
           checkAnswer();
+          return; // Important: stop here after checking
         } else if (e.key === 'Backspace') {
           e.preventDefault();
           if (userAnswer[index]) {
@@ -1046,7 +1038,15 @@
               {!isComplete && (
                 <div className="flex gap-3 justify-center flex-wrap">
                   <button
-                    onClick={checkAnswer}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      checkAnswer();
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      checkAnswer();
+                    }}
+                    type="button"
                     className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-base hover:from-amber-600 hover:to-orange-600 transition-all hover:scale-105 shadow-lg"
                   >
                     Vérifier
@@ -1054,6 +1054,7 @@
                   {currentClue < question.clues.length - 1 && (
                     <button
                       onClick={() => setCurrentClue(currentClue + 1)}
+                      type="button"
                       className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-bold text-base hover:from-blue-600 hover:to-indigo-600 transition-all hover:scale-105 shadow-lg"
                     >
                       Passer

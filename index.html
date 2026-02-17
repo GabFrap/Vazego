@@ -446,20 +446,33 @@
       useEffect(() => {
         if (!question) return;
         
-        // Mobile: scroll down when arriving at clue 2 or 3 to show input boxes
+        // Mobile: scroll DOWN when arriving at clue 2 or 3
         const isMobile = window.innerWidth <= 640;
         if (isMobile && !isComplete && (currentClue === 1 || currentClue === 2)) {
           setTimeout(() => {
-            // Scroll to the input boxes container
             if (inputContainerRef.current) {
-              inputContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const rect = inputContainerRef.current.getBoundingClientRect();
+              const windowHeight = window.innerHeight;
+              // Only scroll if input container is not fully visible
+              if (rect.bottom > windowHeight * 0.85) {
+                // Already below fold - scroll into view
+                inputContainerRef.current.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center' 
+                });
+              } else {
+                // Scroll down to show new clue + input boxes
+                window.scrollBy({ top: 200, behavior: 'smooth' });
+              }
+            } else {
+              // Fallback
+              window.scrollBy({ top: 200, behavior: 'smooth' });
             }
-          }, 300);
+          }, 350);
         }
         
         // Focus behavior - don't auto-focus on mobile to keep keyboard hidden
         if (!isComplete && !isMobile) {
-          // Desktop only - auto focus
           setTimeout(() => {
             if (inputRefs.current[0]) {
               inputRefs.current[0].focus();
@@ -564,29 +577,34 @@
       };
 
       const calculateAndUpdateRatio = () => {
-        // Calculate ratio based on ALL answered questions from TODAY only
-        let totalEarnedPoints = 0;
-        let totalPossibleFromAnswered = 0;
+        // Ratio = total points earned on TODAY questions / total possible on TODAY answered questions
+        // Only count today's questions to avoid practice mode contamination
+        let totalEarnedToday = 0;
+        let totalPossibleToday = 0;
         
-        const allKeys = Object.keys(localStorage).filter(k => k.startsWith('quiz-'));
+        // Get today's date
+        const todayDateStr = getTodayStr();
         
+        const allKeys = Object.keys(localStorage);
         allKeys.forEach(key => {
-          if (key.startsWith('quiz-') && key.includes('-') && !key.includes('total') && !key.includes('current-index')) {
+          // Only count today's answered questions
+          if (key.startsWith(`quiz-${todayDateStr}-`) && 
+              !key.includes('current-index') && 
+              !key.includes('answered-count') &&
+              !key.includes('version')) {
             try {
               const data = JSON.parse(localStorage.getItem(key));
-              if (data && data.isComplete && data.questionScore) {
-                totalEarnedPoints += data.questionScore;
-                totalPossibleFromAnswered += 5; // Max points per question
+              if (data && data.isComplete) {
+                totalEarnedToday += data.questionScore || 0;
+                totalPossibleToday += 5; // Max 5 pts per question
               }
             } catch (e) {}
           }
         });
 
-        if (totalPossibleFromAnswered === 0) {
-          setRatio(0);
-        } else {
-          setRatio(Math.round((totalEarnedPoints / totalPossibleFromAnswered) * 100));
-        }
+        const newRatio = totalPossibleToday === 0 ? 0 : Math.round((totalEarnedToday / totalPossibleToday) * 100);
+        setRatio(newRatio);
+        return newRatio;
       };
 
       const handleInputChange = (index, value) => {
@@ -992,7 +1010,16 @@
                 ))}
               </div>
               
-              <div style={{width: '48px'}}></div>
+              <button
+                onClick={() => {
+                  calculateStats();
+                  setShowStatsModal(true);
+                }}
+                className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all hover:scale-105 shadow-md flex items-center justify-center text-2xl"
+                title="Statistiques"
+              >
+                📊
+              </button>
             </div>
 
             <div className="bg-white rounded-2xl shadow-xl p-6 border-4 border-amber-200 slide-up">
@@ -1150,61 +1177,49 @@
           {/* Statistics Modal */}
           {showStatsModal && (
             <div 
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3"
               onClick={() => setShowStatsModal(false)}
             >
               <div 
-                className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full"
-                style={{maxHeight: '85vh', overflowY: 'auto'}}
+                className="bg-white rounded-2xl shadow-2xl max-w-lg w-full"
+                style={{maxHeight: '75vh', overflowY: 'auto', padding: '1rem'}}
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="text-3xl font-black text-amber-900 text-center mb-6">
+                <h2 className="text-xl font-black text-amber-900 text-center mb-3">
                   🎉 Statistiques
                 </h2>
                 
                 {/* Top: Total Score and Ratio */}
-                <div className="flex gap-3 justify-center mb-6 flex-wrap">
-                  <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-2xl p-4 border-3 border-amber-400 flex-1 min-w-[140px]">
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-gray-600 mb-1">Score Total</div>
-                      <div className="text-3xl font-black text-amber-900">{stats.totalScore}</div>
-                    </div>
+                <div className="flex gap-2 justify-center mb-3">
+                  <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-xl p-2 border-2 border-amber-400 flex-1 text-center">
+                    <div className="text-xs font-semibold text-gray-500">Score Total</div>
+                    <div className="text-2xl font-black text-amber-900">{stats.totalScore}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-4 border-3 border-purple-400 flex-1 min-w-[140px]">
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-gray-600 mb-1">Ratio</div>
-                      <div className="text-3xl font-black text-purple-900">{stats.ratio}%</div>
-                    </div>
+                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-2 border-2 border-purple-400 flex-1 text-center">
+                    <div className="text-xs font-semibold text-gray-500">Ratio</div>
+                    <div className="text-2xl font-black text-purple-900">{stats.ratio}%</div>
                   </div>
-                </div>
-                
-                {/* Center: Total Answered */}
-                <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl p-6 border-3 border-blue-400 mb-6">
-                  <div className="text-center">
-                    <div className="text-base font-semibold text-gray-600 mb-2">Questions Répondues</div>
-                    <div className="text-4xl font-black text-blue-900">{stats.totalAnswered}</div>
+                  <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl p-2 border-2 border-blue-400 flex-1 text-center">
+                    <div className="text-xs font-semibold text-gray-500">Répondues</div>
+                    <div className="text-2xl font-black text-blue-900">{stats.totalAnswered}</div>
                   </div>
                 </div>
                 
-                {/* Bottom: Streaks */}
-                <div className="space-y-3 mb-6">
-                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-4 border-3 border-green-400">
-                    <div className="text-center">
-                      <div className="text-xs font-semibold text-gray-600 mb-1">🔥 Séquence : 1 indice</div>
-                      <div className="text-2xl font-black text-green-900">{stats.streak1Clue}</div>
-                    </div>
+                {/* Streaks */}
+                <div className="flex gap-2 mb-3">
+                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-2 border-2 border-green-400 flex-1 text-center">
+                    <div className="text-xs font-semibold text-gray-500">🔥 Séquence : 1 indice</div>
+                    <div className="text-2xl font-black text-green-900">{stats.streak1Clue}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-orange-100 to-amber-100 rounded-2xl p-4 border-3 border-orange-400">
-                    <div className="text-center">
-                      <div className="text-xs font-semibold text-gray-600 mb-1">🔥 Séquence : 2 indices max</div>
-                      <div className="text-2xl font-black text-orange-900">{stats.streak2Clues}</div>
-                    </div>
+                  <div className="bg-gradient-to-r from-orange-100 to-amber-100 rounded-xl p-2 border-2 border-orange-400 flex-1 text-center">
+                    <div className="text-xs font-semibold text-gray-500">🔥 Séquence : 2 indices max</div>
+                    <div className="text-2xl font-black text-orange-900">{stats.streak2Clues}</div>
                   </div>
                 </div>
                 
                 <button
                   onClick={() => setShowStatsModal(false)}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-lg hover:from-amber-600 hover:to-orange-600 transition-all hover:scale-105 shadow-lg"
+                  className="w-full px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-base hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
                 >
                   Fermer
                 </button>

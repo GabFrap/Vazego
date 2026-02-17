@@ -435,16 +435,16 @@
       useEffect(() => {
         if (!question) return;
         
-        // Mobile: scroll down when arriving at clue 2 or 3
+        // Mobile: scroll down when arriving at clue 2 or 3 to show input boxes
         const isMobile = window.innerWidth <= 640;
         if (isMobile && !isComplete && (currentClue === 1 || currentClue === 2)) {
           setTimeout(() => {
-            // Scroll down to show the new clue and input boxes
-            const clueElement = clueRefs.current[currentClue];
-            if (clueElement) {
-              clueElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Scroll to the input boxes area
+            const inputContainer = inputRefs.current[0]?.parentElement;
+            if (inputContainer) {
+              inputContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-          }, 200);
+          }, 300);
         }
         
         // Focus behavior - don't auto-focus on mobile to keep keyboard hidden
@@ -596,9 +596,8 @@
           }, 150);
         }
 
-        // Only auto-advance on desktop, not mobile
-        const isMobile = window.innerWidth <= 640;
-        if (letter && index < 8 && !isMobile) {
+        // Auto-advance to next box on both mobile and desktop
+        if (letter && index < 8) {
           setTimeout(() => {
             inputRefs.current[index + 1]?.focus();
           }, 20);
@@ -749,20 +748,31 @@
           setTimeout(() => {
             calculateAndUpdateRatio();
             
+            const isMobile = window.innerWidth <= 640;
+            
             // Always scroll to show the answer after 3 wrong attempts
             if (currentQuestionIndex === dailyQuestions.length - 1) {
               setTimeout(() => {
-                scoreHeaderRef.current?.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'start' 
-                });
+                if (isMobile) {
+                  // Mobile: scroll to the answer result
+                  nextQuestionBtnRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                } else {
+                  // Desktop: scroll to score header
+                  scoreHeaderRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }
                 
-                // Show stats modal AFTER scrolling - wait 3 seconds on last question if today
+                // Show stats modal AFTER scrolling - wait 2.5 seconds on last question if today
                 if (isToday) {
                   setTimeout(() => {
                     calculateStats();
                     setShowStatsModal(true);
-                  }, 3000);
+                  }, 2500);
                 }
               }, 300);
             } else {

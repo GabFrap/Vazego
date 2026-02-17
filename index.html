@@ -186,7 +186,7 @@
       },
       // Version key for resetting data
       VERSION_KEY: 'quiz-app-version',
-      CURRENT_VERSION: 'v9'
+      CURRENT_VERSION: 'v10'
     };
 
     function DailyQuiz() {
@@ -390,29 +390,20 @@
             
             // DON'T recalculate ratio here - it causes changes when navigating
             
-            // Scroll to top on mobile when question changes ONLY if not complete
             const isMobile = window.innerWidth <= 640;
             const isQuestionComplete = savedData?.value && JSON.parse(savedData.value).isComplete;
             
-            if (isMobile && !isQuestionComplete) {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            
-            // Always set cursor in first box on desktop
-            // On mobile: use readonly trick to focus without opening keyboard
+            // Focus in first box if question not complete
             if (!isQuestionComplete) {
               setTimeout(() => {
                 if (inputRefs.current[0]) {
                   if (!isMobile) {
-                    // Desktop: focus normally
                     inputRefs.current[0].focus();
                   } else {
-                    // Mobile: readonly trick - focus without opening keyboard
+                    // Mobile: readonly trick - cursor without keyboard
                     inputRefs.current[0].setAttribute('readonly', 'readonly');
                     inputRefs.current[0].focus();
-                    setTimeout(() => {
-                      inputRefs.current[0]?.removeAttribute('readonly');
-                    }, 100);
+                    setTimeout(() => inputRefs.current[0]?.removeAttribute('readonly'), 100);
                   }
                 }
               }, 300);
@@ -425,13 +416,7 @@
             setQuestionScore(0);
             setWrongAnswers([]);
             
-            // Scroll to top on mobile
             const isMobile = window.innerWidth <= 640;
-            if (isMobile) {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            
-            // Same readonly trick on error
             setTimeout(() => {
               if (inputRefs.current[0]) {
                 if (!isMobile) {
@@ -439,9 +424,7 @@
                 } else {
                   inputRefs.current[0].setAttribute('readonly', 'readonly');
                   inputRefs.current[0].focus();
-                  setTimeout(() => {
-                    inputRefs.current[0]?.removeAttribute('readonly');
-                  }, 100);
+                  setTimeout(() => inputRefs.current[0]?.removeAttribute('readonly'), 100);
                 }
               }
             }, 300);
@@ -458,43 +441,26 @@
       useEffect(() => {
         if (!question) return;
         
-        // Mobile: ALWAYS scroll down when arriving at clue 2 or 3
         const isMobile = window.innerWidth <= 640;
+        
+        // Mobile: scroll down to show new clue + input boxes on clue 2 or 3
+        // Don't close keyboard (no blur), don't focus (no readonly trick)
         if (isMobile && !isComplete && (currentClue === 1 || currentClue === 2)) {
-          // First scroll to the new clue element
           setTimeout(() => {
+            // Scroll so the new clue appears at top, input boxes visible below
             const clueEl = clueRefs.current[currentClue];
             if (clueEl) {
               clueEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-          }, 200);
-          
-          // Then a second scroll to make sure input boxes are visible too
-          setTimeout(() => {
-            if (inputContainerRef.current) {
-              inputContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-          }, 600);
+          }, 150);
+          return; // Don't do focus tricks when keyboard should stay open
         }
         
-        // Focus behavior - don't auto-focus on mobile to keep keyboard hidden
+        // Desktop only: auto-focus on clue change
         if (!isComplete && !isMobile) {
           setTimeout(() => {
-            if (inputRefs.current[0]) {
-              inputRefs.current[0].focus();
-            }
+            if (inputRefs.current[0]) inputRefs.current[0].focus();
           }, 250);
-        } else if (!isComplete && isMobile) {
-          // Mobile: readonly trick to focus without keyboard
-          setTimeout(() => {
-            if (inputRefs.current[0]) {
-              inputRefs.current[0].setAttribute('readonly', 'readonly');
-              inputRefs.current[0].focus();
-              setTimeout(() => {
-                inputRefs.current[0]?.removeAttribute('readonly');
-              }, 100);
-            }
-          }, 450);
         }
       }, [currentClue, question, isComplete]);
 
@@ -812,7 +778,7 @@
                   setTimeout(() => {
                     calculateStats();
                     setShowStatsModal(true);
-                  }, 2000);
+                  }, 2500);
                 }
               }, 300);
             } else {
@@ -963,13 +929,7 @@
             <div className="flex justify-between items-center mb-4">
               <div className="relative calendar-container">
                 <button
-                  onClick={() => {
-                    setShowCalendar(!showCalendar);
-                    if (!showCalendar) {
-                      // Scroll to top when opening calendar
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                  }}
+                  onClick={() => setShowCalendar(!showCalendar)}
                   className="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-bold transition-all hover:scale-105 shadow-md flex items-center justify-center text-2xl"
                   title="Calendrier"
                 >
@@ -1079,11 +1039,7 @@
                 ))}
               </div>
 
-              <div className="mb-5 p-3 bg-amber-50 border-2 border-amber-200 rounded-xl">
-                <p className="text-center text-amber-800 font-semibold text-sm">
-                  💡 Entrez votre réponse (maximum 9 lettres)
-                </p>
-              </div>
+              <hr style={{border: 'none', borderTop: '2px solid #fde68a', margin: '0.75rem 0 1rem 0'}} />
 
               {showError && (
                 <div className="mb-5 p-3 bg-red-100 border-2 border-red-400 rounded-xl">
@@ -1199,7 +1155,7 @@
             >
               <div 
                 className="bg-white rounded-2xl shadow-2xl max-w-lg w-full"
-                style={{maxHeight: '75vh', overflowY: 'auto', padding: '1rem'}}
+                style={{maxHeight: '80vh', overflowY: 'auto', padding: '1.25rem', margin: '0 0.5rem'}}
                 onClick={(e) => e.stopPropagation()}
               >
                 <h2 className="text-xl font-black text-amber-900 text-center mb-3">
@@ -1208,15 +1164,15 @@
                 
                 {/* Top: Total Score and Ratio */}
                 <div className="flex gap-2 justify-center mb-3">
-                  <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-xl p-2 border-2 border-amber-400 flex-1 text-center">
+                  <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-xl p-2 border-2 border-amber-400 text-center" style={{flex: '1'}}>
                     <div className="text-xs font-semibold text-gray-500">Score Total</div>
                     <div className="text-2xl font-black text-amber-900">{stats.totalScore}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-2 border-2 border-purple-400 flex-1 text-center">
+                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-2 border-2 border-purple-400 text-center" style={{flex: '2'}}>
                     <div className="text-xs font-semibold text-gray-500">Ratio</div>
-                    <div className="text-2xl font-black text-purple-900">{stats.ratio}%</div>
+                    <div className="text-xl font-black text-purple-900">{stats.ratio}%</div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl p-2 border-2 border-blue-400 flex-1 text-center">
+                  <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl p-2 border-2 border-blue-400 text-center" style={{flex: '1'}}>
                     <div className="text-xs font-semibold text-gray-500">Répondues</div>
                     <div className="text-2xl font-black text-blue-900">{stats.totalAnswered}</div>
                   </div>
@@ -1224,11 +1180,11 @@
                 
                 {/* Streaks */}
                 <div className="flex gap-2 mb-3">
-                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-2 border-2 border-green-400 flex-1 text-center">
+                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-3 border-2 border-green-400 flex-1 text-center">
                     <div className="text-xs font-semibold text-gray-500">🔥 Séquence : 1 indice</div>
                     <div className="text-2xl font-black text-green-900">{stats.streak1Clue}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-orange-100 to-amber-100 rounded-xl p-2 border-2 border-orange-400 flex-1 text-center">
+                  <div className="bg-gradient-to-r from-orange-100 to-amber-100 rounded-xl p-3 border-2 border-orange-400 flex-1 text-center">
                     <div className="text-xs font-semibold text-gray-500">🔥 Séquence : 2 indices max</div>
                     <div className="text-2xl font-black text-orange-900">{stats.streak2Clues}</div>
                   </div>

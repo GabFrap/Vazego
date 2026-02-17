@@ -277,9 +277,24 @@
           }
         };
         
+        // Global ENTER listener for next question when complete
+        const handleGlobalEnter = (e) => {
+          if (e.key === 'Enter' && isComplete && currentQuestionIndex < dailyQuestions.length - 1) {
+            // Check if we're not focused on an input
+            if (document.activeElement.tagName !== 'INPUT') {
+              e.preventDefault();
+              goToNextQuestion();
+            }
+          }
+        };
+        
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-      }, [showCalendar]);
+        document.addEventListener('keydown', handleGlobalEnter);
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+          document.removeEventListener('keydown', handleGlobalEnter);
+        };
+      }, [showCalendar, isComplete, currentQuestionIndex, dailyQuestions.length]);
 
       useEffect(() => {
         const loadProgress = async () => {
@@ -372,18 +387,17 @@
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             
-            // Focus on first available input - but NOT on initial page load for mobile
-            setTimeout(() => {
-              if (!savedData?.value || !JSON.parse(savedData.value).isComplete) {
-                if (!isInitialLoad || !isMobile) {
-                  const firstAvailable = 0;
-                  if (inputRefs.current[firstAvailable]) {
-                    inputRefs.current[firstAvailable].focus();
-                  }
+            // On mobile: NEVER auto-focus to prevent keyboard popup
+            // On desktop: focus on first input
+            if (!isMobile && !isQuestionComplete) {
+              setTimeout(() => {
+                const firstAvailable = 0;
+                if (inputRefs.current[firstAvailable]) {
+                  inputRefs.current[firstAvailable].focus();
                 }
-              }
-              setIsInitialLoad(false);
-            }, isMobile && !isQuestionComplete ? 400 : 150); // Longer delay on mobile for scroll to complete
+              }, 150);
+            }
+            setIsInitialLoad(false);
           } catch (error) {
             setUserAnswer(Array(9).fill(''));
             setCurrentClue(0);
@@ -397,15 +411,13 @@
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             
-            // Focus even on error - but not on mobile initial load
-            setTimeout(() => {
-              if (!isInitialLoad || !isMobile) {
-                if (inputRefs.current[0]) {
-                  inputRefs.current[0].focus();
-                }
-              }
-              setIsInitialLoad(false);
-            }, isMobile ? 400 : 150);
+            // On desktop only - focus on error
+            if (!isMobile && inputRefs.current[0]) {
+              setTimeout(() => {
+                inputRefs.current[0].focus();
+              }, 150);
+            }
+            setIsInitialLoad(false);
           }
         };
         loadQuestionProgress();
@@ -584,8 +596,13 @@
         // If complete and user presses Enter, go to next question
         if (isComplete && e.key === 'Enter') {
           e.preventDefault();
+          e.stopPropagation();
           if (currentQuestionIndex < dailyQuestions.length - 1) {
-            goToNextQuestion();
+            // Blur to close keyboard first
+            if (inputRefs.current[index]) {
+              inputRefs.current[index].blur();
+            }
+            setTimeout(() => goToNextQuestion(), 100);
           }
           return;
         }
@@ -651,10 +668,11 @@
         const correct = answer === question.answer;
         
         if (correct && !isComplete) {
-          const points = question.points[currentClue];
-          setQuestionScore(points);
-          // Only count points if it's today
+          // Only save points if it's today - don't even save them in localStorage for past dates
           if (isToday) {
+            const points = question.points[currentClue];
+            setQuestionScore(points);
+            
             const newCount = answeredCount + 1;
             setAnsweredCount(newCount);
             storage.set('quiz-answered-count', JSON.stringify(newCount));
@@ -666,6 +684,9 @@
             
             // Recalculate ratio after adding points
             setTimeout(() => calculateAndUpdateRatio(), 100);
+          } else {
+            // Practice mode - set score to 0 so it doesn't save
+            setQuestionScore(0);
           }
           setIsComplete(true);
           

@@ -186,7 +186,7 @@
       },
       // Version key for resetting data
       VERSION_KEY: 'quiz-app-version',
-      CURRENT_VERSION: 'v8'
+      CURRENT_VERSION: 'v9'
     };
 
     function DailyQuiz() {
@@ -399,7 +399,7 @@
             }
             
             // Always set cursor in first box on desktop
-            // On mobile: set cursor position without focusing (no keyboard)
+            // On mobile: use readonly trick to focus without opening keyboard
             if (!isQuestionComplete) {
               setTimeout(() => {
                 if (inputRefs.current[0]) {
@@ -407,11 +407,15 @@
                     // Desktop: focus normally
                     inputRefs.current[0].focus();
                   } else {
-                    // Mobile: set selection without focus to position cursor
-                    inputRefs.current[0].setSelectionRange(0, 0);
+                    // Mobile: readonly trick - focus without opening keyboard
+                    inputRefs.current[0].setAttribute('readonly', 'readonly');
+                    inputRefs.current[0].focus();
+                    setTimeout(() => {
+                      inputRefs.current[0]?.removeAttribute('readonly');
+                    }, 100);
                   }
                 }
-              }, 150);
+              }, 300);
             }
             setIsInitialLoad(false);
           } catch (error) {
@@ -427,12 +431,20 @@
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             
-            // On desktop only - focus on error
-            if (!isMobile && inputRefs.current[0]) {
-              setTimeout(() => {
-                inputRefs.current[0].focus();
-              }, 150);
-            }
+            // Same readonly trick on error
+            setTimeout(() => {
+              if (inputRefs.current[0]) {
+                if (!isMobile) {
+                  inputRefs.current[0].focus();
+                } else {
+                  inputRefs.current[0].setAttribute('readonly', 'readonly');
+                  inputRefs.current[0].focus();
+                  setTimeout(() => {
+                    inputRefs.current[0]?.removeAttribute('readonly');
+                  }, 100);
+                }
+              }
+            }, 300);
             setIsInitialLoad(false);
           }
         };
@@ -446,29 +458,23 @@
       useEffect(() => {
         if (!question) return;
         
-        // Mobile: scroll DOWN when arriving at clue 2 or 3
+        // Mobile: ALWAYS scroll down when arriving at clue 2 or 3
         const isMobile = window.innerWidth <= 640;
         if (isMobile && !isComplete && (currentClue === 1 || currentClue === 2)) {
+          // First scroll to the new clue element
+          setTimeout(() => {
+            const clueEl = clueRefs.current[currentClue];
+            if (clueEl) {
+              clueEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 200);
+          
+          // Then a second scroll to make sure input boxes are visible too
           setTimeout(() => {
             if (inputContainerRef.current) {
-              const rect = inputContainerRef.current.getBoundingClientRect();
-              const windowHeight = window.innerHeight;
-              // Only scroll if input container is not fully visible
-              if (rect.bottom > windowHeight * 0.85) {
-                // Already below fold - scroll into view
-                inputContainerRef.current.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'center' 
-                });
-              } else {
-                // Scroll down to show new clue + input boxes
-                window.scrollBy({ top: 200, behavior: 'smooth' });
-              }
-            } else {
-              // Fallback
-              window.scrollBy({ top: 200, behavior: 'smooth' });
+              inputContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
-          }, 350);
+          }, 600);
         }
         
         // Focus behavior - don't auto-focus on mobile to keep keyboard hidden
@@ -478,6 +484,17 @@
               inputRefs.current[0].focus();
             }
           }, 250);
+        } else if (!isComplete && isMobile) {
+          // Mobile: readonly trick to focus without keyboard
+          setTimeout(() => {
+            if (inputRefs.current[0]) {
+              inputRefs.current[0].setAttribute('readonly', 'readonly');
+              inputRefs.current[0].focus();
+              setTimeout(() => {
+                inputRefs.current[0]?.removeAttribute('readonly');
+              }, 100);
+            }
+          }, 450);
         }
       }, [currentClue, question, isComplete]);
 
@@ -509,25 +526,30 @@
         let totalPossible = 0;
         let answered = 0;
         
-        // Get all quiz entries and sort by date
+        // Get ONLY today's quiz entries for stats
+        const todayDateStr = getTodayStr();
         const allEntries = [];
+        
         Object.keys(localStorage).forEach(key => {
-          if (key.startsWith('quiz-') && key.includes('-') && !key.includes('total') && !key.includes('current-index') && !key.includes('answered-count')) {
+          // ONLY count today's questions
+          if (key.startsWith(`quiz-${todayDateStr}-`) && 
+              !key.includes('current-index') && 
+              !key.includes('answered-count') &&
+              !key.includes('version')) {
             const parts = key.split('-');
-            if (parts.length >= 4) {
-              const date = `${parts[1]}-${parts[2]}-${parts[3]}`;
+            if (parts.length >= 5) {
               const questionIndex = parseInt(parts[4]);
               try {
                 const data = JSON.parse(localStorage.getItem(key));
                 if (data && data.isComplete) {
                   allEntries.push({
-                    date,
+                    date: todayDateStr,
                     questionIndex,
                     score: data.questionScore || 0,
                     cluesUsed: data.currentClue + 1
                   });
                   totalPts += data.questionScore || 0;
-                  totalPossible += 5; // Max points per question
+                  totalPossible += 5;
                   answered++;
                 }
               } catch (e) {}
@@ -535,11 +557,8 @@
           }
         });
         
-        // Sort by date then question index
-        allEntries.sort((a, b) => {
-          if (a.date === b.date) return a.questionIndex - b.questionIndex;
-          return a.date.localeCompare(b.date);
-        });
+        // Sort by question index
+        allEntries.sort((a, b) => a.questionIndex - b.questionIndex);
         
         // Calculate streaks
         let current1Streak = 0;
@@ -548,7 +567,6 @@
         let max2Streak = 0;
         
         allEntries.forEach(entry => {
-          // Streak for 1 clue (5 points)
           if (entry.cluesUsed === 1) {
             current1Streak++;
             max1Streak = Math.max(max1Streak, current1Streak);
@@ -556,7 +574,6 @@
             current1Streak = 0;
           }
           
-          // Streak for 2 clues or less (3 or 5 points)
           if (entry.cluesUsed <= 2) {
             current2Streak++;
             max2Streak = Math.max(max2Streak, current2Streak);
@@ -795,7 +812,7 @@
                   setTimeout(() => {
                     calculateStats();
                     setShowStatsModal(true);
-                  }, 2500);
+                  }, 2000);
                 }
               }, 300);
             } else {
@@ -1096,10 +1113,10 @@
                       className={`answer-font w-9 h-9 text-center text-2xl uppercase rounded-md transition-all duration-150 border
                         ${isCrossed
                           ? 'bg-gray-100 border-gray-200 text-gray-300 line-through cursor-not-allowed'
-                          : isComplete && index < question.answer.length && userAnswer[index] === question.answer[index]
-                          ? 'bg-green-100 border-green-500 text-green-800 border-2'
-                          : isComplete && index < question.answer.length && userAnswer[index] && userAnswer[index] !== question.answer[index]
+                          : isComplete && questionScore === 0 && index < question.answer.length && userAnswer[index]
                           ? 'bg-red-100 border-red-500 text-red-800 border-2'
+                          : isComplete && questionScore > 0 && index < question.answer.length
+                          ? 'bg-green-100 border-green-500 text-green-800 border-2'
                           : 'bg-white border-gray-300 text-amber-900'
                         } ${isComplete ? 'cursor-not-allowed' : isCrossed ? 'cursor-not-allowed' : 'hover:border-orange-400'}`}
                       tabIndex={!isComplete ? 0 : -1}

@@ -387,13 +387,18 @@
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             
-            // On mobile: NEVER auto-focus to prevent keyboard popup
-            // On desktop: focus on first input
-            if (!isMobile && !isQuestionComplete) {
+            // Always set cursor in first box on desktop
+            // On mobile: set cursor position without focusing (no keyboard)
+            if (!isQuestionComplete) {
               setTimeout(() => {
-                const firstAvailable = 0;
-                if (inputRefs.current[firstAvailable]) {
-                  inputRefs.current[firstAvailable].focus();
+                if (inputRefs.current[0]) {
+                  if (!isMobile) {
+                    // Desktop: focus normally
+                    inputRefs.current[0].focus();
+                  } else {
+                    // Mobile: set selection without focus to position cursor
+                    inputRefs.current[0].setSelectionRange(0, 0);
+                  }
                 }
               }, 150);
             }
@@ -430,18 +435,26 @@
       useEffect(() => {
         if (!question) return;
         
+        // Mobile: scroll down when arriving at clue 2 or 3
+        const isMobile = window.innerWidth <= 640;
+        if (isMobile && !isComplete && (currentClue === 1 || currentClue === 2)) {
+          setTimeout(() => {
+            // Scroll down to show the new clue and input boxes
+            const clueElement = clueRefs.current[currentClue];
+            if (clueElement) {
+              clueElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 200);
+        }
+        
         // Focus behavior - don't auto-focus on mobile to keep keyboard hidden
-        if (!isComplete) {
-          const isMobile = window.innerWidth <= 640;
-          if (!isMobile) {
-            // Desktop - auto focus
-            setTimeout(() => {
-              if (inputRefs.current[0]) {
-                inputRefs.current[0].focus();
-              }
-            }, 250);
-          }
-          // Mobile - don't auto focus to keep keyboard hidden, but cursor still in first box
+        if (!isComplete && !isMobile) {
+          // Desktop only - auto focus
+          setTimeout(() => {
+            if (inputRefs.current[0]) {
+              inputRefs.current[0].focus();
+            }
+          }, 250);
         }
       }, [currentClue, question, isComplete]);
 
@@ -583,7 +596,9 @@
           }, 150);
         }
 
-        if (letter && index < 8) {
+        // Only auto-advance on desktop, not mobile
+        const isMobile = window.innerWidth <= 640;
+        if (letter && index < 8 && !isMobile) {
           setTimeout(() => {
             inputRefs.current[index + 1]?.focus();
           }, 20);
@@ -734,14 +749,6 @@
           setTimeout(() => {
             calculateAndUpdateRatio();
             
-            // Show stats modal if last question on today's quiz
-            if (currentQuestionIndex === dailyQuestions.length - 1 && isToday) {
-              setTimeout(() => {
-                calculateStats();
-                setShowStatsModal(true);
-              }, 800);
-            }
-            
             // Always scroll to show the answer after 3 wrong attempts
             if (currentQuestionIndex === dailyQuestions.length - 1) {
               setTimeout(() => {
@@ -749,6 +756,14 @@
                   behavior: 'smooth', 
                   block: 'start' 
                 });
+                
+                // Show stats modal AFTER scrolling - wait 3 seconds on last question if today
+                if (isToday) {
+                  setTimeout(() => {
+                    calculateStats();
+                    setShowStatsModal(true);
+                  }, 3000);
+                }
               }, 300);
             } else {
               setTimeout(() => {
@@ -1029,6 +1044,8 @@
                       key={index}
                       ref={el => inputRefs.current[index] = el}
                       type="text"
+                      inputMode="text"
+                      enterKeyHint="done"
                       maxLength="1"
                       value={userAnswer[index]}
                       onChange={(e) => handleInputChange(index, e.target.value)}

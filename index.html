@@ -783,7 +783,7 @@
             
             // Scroll to show the answer after 3 wrong attempts
             if (currentQuestionIndex === dailyQuestions.length - 1) {
-              // Last question (Q3): scroll to answer
+              // Last question (Q3): scroll to answer, then show stats
               setTimeout(() => {
                 const answerElement = document.querySelector('.slide-up');
                 if (answerElement) {
@@ -801,8 +801,8 @@
                   }, 2500);
                 }
               }, 300);
-            } else if (!isMobile) {
-              // Desktop Q1/Q2: scroll to next button
+            } else {
+              // Q1 or Q2: scroll to next question button
               setTimeout(() => {
                 nextQuestionBtnRef.current?.scrollIntoView({ 
                   behavior: 'smooth', 
@@ -810,7 +810,6 @@
                 });
               }, 300);
             }
-            // Mobile Q1/Q2 after 3 errors: no scroll
           }, 100);
         }
       };
@@ -1087,6 +1086,17 @@
                       value={userAnswer[index]}
                       onChange={(e) => handleInputChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
+                      onFocus={(e) => {
+                        // On mobile: scroll to keep input boxes visible when keyboard opens
+                        if (window.innerWidth <= 640 && inputContainerRef.current) {
+                          setTimeout(() => {
+                            inputContainerRef.current?.scrollIntoView({ 
+                              behavior: 'smooth', 
+                              block: 'center' 
+                            });
+                          }, 300);
+                        }
+                      }}
                       disabled={isComplete}
                       className={`answer-font w-9 h-9 text-center text-2xl uppercase rounded-md transition-all duration-150 border
                         ${isCrossed

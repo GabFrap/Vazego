@@ -186,7 +186,7 @@
       },
       // Version key for resetting data
       VERSION_KEY: 'quiz-app-version',
-      CURRENT_VERSION: 'v7'
+      CURRENT_VERSION: 'v8'
     };
 
     function DailyQuiz() {
@@ -284,7 +284,7 @@
       useEffect(() => {
         const loadProgress = async () => {
           try {
-            // Load all-time total score from localStorage
+            // Load all-time total score from localStorage - ALL dates
             let allTimeTotal = 0;
             const allKeys = Object.keys(localStorage);
             
@@ -301,7 +301,10 @@
             
             setTotalScore(allTimeTotal);
             
-            // Load today's score separately
+            // Calculate ratio here once
+            calculateAndUpdateRatio();
+            
+            // Load today's score separately - ONLY today
             let todayTotal = 0;
             dailyQuestions.forEach((q, idx) => {
               const key = `quiz-${todayStr}-${idx}`;
@@ -359,7 +362,7 @@
               setWrongAnswers([]);
             }
             
-            calculateAndUpdateRatio();
+            // DON'T recalculate ratio here - it causes changes when navigating
             
             // Scroll to top on mobile when question changes ONLY if not complete
             const isMobile = window.innerWidth <= 640;
@@ -415,36 +418,18 @@
       useEffect(() => {
         if (!question) return;
         
-        // Scroll behavior for mobile when clues change
-        if (window.innerWidth <= 640 && !isComplete) {
-          setTimeout(() => {
-            const clueElement = clueRefs.current[currentClue];
-            if (clueElement) {
-              // Scroll so ONLY the current clue is visible with boxes directly underneath
-              // This hides the clues that come after
-              const elementTop = clueElement.getBoundingClientRect().top + window.scrollY;
-              const offset = 80; // Small offset from top (just below category/score)
-              
-              window.scrollTo({ 
-                top: elementTop - offset, 
-                behavior: 'smooth' 
-              });
-              
-              // Focus after scroll completes
-              setTimeout(() => {
-                if (inputRefs.current[0]) {
-                  inputRefs.current[0].focus();
-                }
-              }, 500);
-            }
-          }, 200);
-        } else if (!isComplete) {
-          // Desktop - just re-focus
-          setTimeout(() => {
-            if (inputRefs.current[0]) {
-              inputRefs.current[0].focus();
-            }
-          }, 250);
+        // Focus behavior - don't auto-focus on mobile to keep keyboard hidden
+        if (!isComplete) {
+          const isMobile = window.innerWidth <= 640;
+          if (!isMobile) {
+            // Desktop - auto focus
+            setTimeout(() => {
+              if (inputRefs.current[0]) {
+                inputRefs.current[0].focus();
+              }
+            }, 250);
+          }
+          // Mobile - don't auto focus to keep keyboard hidden, but cursor still in first box
         }
       }, [currentClue, question, isComplete]);
 
@@ -609,8 +594,13 @@
 
         if (e.key === 'Enter') {
           e.preventDefault();
-          checkAnswer();
-          return; // Important: stop here after checking
+          e.stopPropagation();
+          // Blur to close mobile keyboard, then validate
+          if (inputRefs.current[index]) {
+            inputRefs.current[index].blur();
+          }
+          setTimeout(() => checkAnswer(), 100);
+          return;
         } else if (e.key === 'Backspace') {
           e.preventDefault();
           if (userAnswer[index]) {
@@ -673,11 +663,13 @@
             setTodayScore(prev => prev + points);
             setShowScoreAnimation(true);
             setTimeout(() => setShowScoreAnimation(false), 600);
+            
+            // Recalculate ratio after adding points
+            setTimeout(() => calculateAndUpdateRatio(), 100);
           }
           setIsComplete(true);
           
           setTimeout(() => {
-            calculateAndUpdateRatio();
             
             // Show stats modal if last question on today's quiz
             if (currentQuestionIndex === dailyQuestions.length - 1 && isToday) {
@@ -729,26 +721,21 @@
               }, 800);
             }
             
-            // Only scroll if user got it right - don't scroll on wrong answer at end
-            if (userAnswer.join('').trim() === question.answer) {
-              // Scroll behavior for both mobile and desktop
-              if (currentQuestionIndex === dailyQuestions.length - 1) {
-                // Last question - scroll to score
-                setTimeout(() => {
-                  scoreHeaderRef.current?.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                  });
-                }, 300);
-              } else {
-                // Not last question - scroll to next button
-                setTimeout(() => {
-                  nextQuestionBtnRef.current?.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                  });
-                }, 300);
-              }
+            // Always scroll to show the answer after 3 wrong attempts
+            if (currentQuestionIndex === dailyQuestions.length - 1) {
+              setTimeout(() => {
+                scoreHeaderRef.current?.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start' 
+                });
+              }, 300);
+            } else {
+              setTimeout(() => {
+                nextQuestionBtnRef.current?.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center' 
+                });
+              }, 300);
             }
           }, 100);
         }
@@ -890,7 +877,13 @@
             <div className="flex justify-between items-center mb-4">
               <div className="relative calendar-container">
                 <button
-                  onClick={() => setShowCalendar(!showCalendar)}
+                  onClick={() => {
+                    setShowCalendar(!showCalendar);
+                    if (!showCalendar) {
+                      // Scroll to top when opening calendar
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
                   className="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-bold transition-all hover:scale-105 shadow-md flex items-center justify-center text-2xl"
                   title="Calendrier"
                 >
@@ -1037,6 +1030,15 @@
 
               {!isComplete && (
                 <div className="flex gap-3 justify-center flex-wrap">
+                  {currentClue < question.clues.length - 1 && (
+                    <button
+                      onClick={() => setCurrentClue(currentClue + 1)}
+                      type="button"
+                      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-bold text-base hover:from-blue-600 hover:to-indigo-600 transition-all hover:scale-105 shadow-lg"
+                    >
+                      Passer
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -1049,17 +1051,8 @@
                     type="button"
                     className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-base hover:from-amber-600 hover:to-orange-600 transition-all hover:scale-105 shadow-lg"
                   >
-                    Vérifier
+                    Valider
                   </button>
-                  {currentClue < question.clues.length - 1 && (
-                    <button
-                      onClick={() => setCurrentClue(currentClue + 1)}
-                      type="button"
-                      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-bold text-base hover:from-blue-600 hover:to-indigo-600 transition-all hover:scale-105 shadow-lg"
-                    >
-                      Passer
-                    </button>
-                  )}
                 </div>
               )}
 

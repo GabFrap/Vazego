@@ -231,6 +231,7 @@
       
       const clueRefs = useRef([]);
       const inputRefs = useRef([]);
+      const inputContainerRef = useRef(null);
       const nextQuestionBtnRef = useRef(null);
       const scoreHeaderRef = useRef(null);
       
@@ -277,13 +278,23 @@
           }
         };
         
-        // Global ENTER listener for next question when complete
+        // Global ENTER listener for next question when complete OR close stats modal
         const handleGlobalEnter = (e) => {
-          if (e.key === 'Enter' && isComplete && currentQuestionIndex < dailyQuestions.length - 1) {
-            // Check if we're not focused on an input
-            if (document.activeElement.tagName !== 'INPUT') {
+          if (e.key === 'Enter') {
+            // Close stats modal if it's open
+            if (showStatsModal) {
               e.preventDefault();
-              goToNextQuestion();
+              setShowStatsModal(false);
+              return;
+            }
+            
+            // Next question if complete
+            if (isComplete && currentQuestionIndex < dailyQuestions.length - 1) {
+              // Check if we're not focused on an input
+              if (document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                goToNextQuestion();
+              }
             }
           }
         };
@@ -294,7 +305,7 @@
           document.removeEventListener('mousedown', handleClickOutside);
           document.removeEventListener('keydown', handleGlobalEnter);
         };
-      }, [showCalendar, isComplete, currentQuestionIndex, dailyQuestions.length]);
+      }, [showCalendar, isComplete, currentQuestionIndex, dailyQuestions.length, showStatsModal]);
 
       useEffect(() => {
         const loadProgress = async () => {
@@ -316,8 +327,8 @@
             
             setTotalScore(allTimeTotal);
             
-            // Calculate ratio here once
-            calculateAndUpdateRatio();
+            // Calculate ratio here once on initial load
+            setTimeout(() => calculateAndUpdateRatio(), 100);
             
             // Load today's score separately - ONLY today
             let todayTotal = 0;
@@ -439,10 +450,9 @@
         const isMobile = window.innerWidth <= 640;
         if (isMobile && !isComplete && (currentClue === 1 || currentClue === 2)) {
           setTimeout(() => {
-            // Scroll to the input boxes area
-            const inputContainer = inputRefs.current[0]?.parentElement;
-            if (inputContainer) {
-              inputContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Scroll to the input boxes container
+            if (inputContainerRef.current) {
+              inputContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
           }, 300);
         }
@@ -753,17 +763,12 @@
             // Always scroll to show the answer after 3 wrong attempts
             if (currentQuestionIndex === dailyQuestions.length - 1) {
               setTimeout(() => {
-                if (isMobile) {
-                  // Mobile: scroll to the answer result
-                  nextQuestionBtnRef.current?.scrollIntoView({ 
+                // Both mobile and desktop: scroll to show the answer
+                const answerElement = document.querySelector('.slide-up');
+                if (answerElement) {
+                  answerElement.scrollIntoView({ 
                     behavior: 'smooth', 
-                    block: 'start' 
-                  });
-                } else {
-                  // Desktop: scroll to score header
-                  scoreHeaderRef.current?.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
+                    block: 'center' 
                   });
                 }
                 
@@ -1044,7 +1049,7 @@
                 </div>
               )}
 
-              <div className="flex gap-1 justify-center mb-5">
+              <div ref={inputContainerRef} className="flex gap-1 justify-center mb-5">
                 {Array(9).fill(0).map((_, index) => {
                   const isAnswerBox = index < question.answer.length;
                   const isCrossed = !isAnswerBox && currentClue >= 2;
@@ -1150,7 +1155,7 @@
             >
               <div 
                 className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full"
-                style={{maxHeight: '90vh', overflowY: 'auto'}}
+                style={{maxHeight: '85vh', overflowY: 'auto'}}
                 onClick={(e) => e.stopPropagation()}
               >
                 <h2 className="text-3xl font-black text-amber-900 text-center mb-6">

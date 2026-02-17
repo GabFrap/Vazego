@@ -400,9 +400,9 @@
                   if (!isMobile) {
                     inputRefs.current[0].focus();
                   } else {
-                    // Mobile: readonly trick - cursor without keyboard
+                    // Mobile: readonly trick - cursor without keyboard, no scroll
                     inputRefs.current[0].setAttribute('readonly', 'readonly');
-                    inputRefs.current[0].focus();
+                    inputRefs.current[0].focus({ preventScroll: true });
                     setTimeout(() => inputRefs.current[0]?.removeAttribute('readonly'), 100);
                   }
                 }
@@ -423,7 +423,7 @@
                   inputRefs.current[0].focus();
                 } else {
                   inputRefs.current[0].setAttribute('readonly', 'readonly');
-                  inputRefs.current[0].focus();
+                  inputRefs.current[0].focus({ preventScroll: true });
                   setTimeout(() => inputRefs.current[0]?.removeAttribute('readonly'), 100);
                 }
               }
@@ -725,26 +725,46 @@
               }, 800);
             }
             
-            // Scroll behavior for both mobile and desktop
-            if (currentQuestionIndex === dailyQuestions.length - 1) {
-              // Last question - scroll to score
-              setTimeout(() => {
-                scoreHeaderRef.current?.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'start' 
-                });
-              }, 300);
+            // Scroll behavior after CORRECT answer
+            const isMobile = window.innerWidth <= 640;
+            if (!isMobile) {
+              // Desktop: always scroll to next button or score
+              if (currentQuestionIndex === dailyQuestions.length - 1) {
+                setTimeout(() => {
+                  scoreHeaderRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }, 300);
+              } else {
+                setTimeout(() => {
+                  nextQuestionBtnRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                  });
+                }, 300);
+              }
             } else {
-              // Not last question - scroll to next button
-              setTimeout(() => {
-                nextQuestionBtnRef.current?.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'center' 
-                });
-              }, 300);
+              // Mobile: always scroll to next button or score after CORRECT answer
+              if (currentQuestionIndex === dailyQuestions.length - 1) {
+                setTimeout(() => {
+                  scoreHeaderRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }, 300);
+              } else {
+                setTimeout(() => {
+                  nextQuestionBtnRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                  });
+                }, 300);
+              }
             }
           }, 100);
         } else if (!correct && currentClue < question.clues.length - 1) {
+          // Wrong answer - advance to next clue WITHOUT scrolling on mobile
           setWrongAnswers(prev => [...prev, answer]);
           setUserAnswer(Array(9).fill(''));
           setCurrentClue(currentClue + 1);
@@ -761,10 +781,10 @@
             
             const isMobile = window.innerWidth <= 640;
             
-            // Always scroll to show the answer after 3 wrong attempts
+            // Scroll to show the answer after 3 wrong attempts
             if (currentQuestionIndex === dailyQuestions.length - 1) {
+              // Last question (Q3): scroll to answer
               setTimeout(() => {
-                // Both mobile and desktop: scroll to show the answer
                 const answerElement = document.querySelector('.slide-up');
                 if (answerElement) {
                   answerElement.scrollIntoView({ 
@@ -773,7 +793,7 @@
                   });
                 }
                 
-                // Show stats modal AFTER scrolling - wait 2.5 seconds on last question if today
+                // Show stats modal AFTER scrolling - wait 2.5 seconds if today
                 if (isToday) {
                   setTimeout(() => {
                     calculateStats();
@@ -781,7 +801,8 @@
                   }, 2500);
                 }
               }, 300);
-            } else {
+            } else if (!isMobile) {
+              // Desktop Q1/Q2: scroll to next button
               setTimeout(() => {
                 nextQuestionBtnRef.current?.scrollIntoView({ 
                   behavior: 'smooth', 
@@ -789,6 +810,7 @@
                 });
               }, 300);
             }
+            // Mobile Q1/Q2 after 3 errors: no scroll
           }, 100);
         }
       };
@@ -1164,7 +1186,7 @@
                 
                 {/* Top: Total Score and Ratio */}
                 <div className="flex gap-2 justify-center mb-3">
-                  <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-xl p-2 border-2 border-amber-400 text-center" style={{flex: '1'}}>
+                  <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-xl p-2 border-2 border-amber-400 text-center" style={{flex: '2'}}>
                     <div className="text-xs font-semibold text-gray-500">Score Total</div>
                     <div className="text-2xl font-black text-amber-900">{stats.totalScore}</div>
                   </div>

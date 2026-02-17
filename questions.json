@@ -1,5 +1,5 @@
 {
-  "2026-02-15": [
+  "2026-02-16": [
     {
       "category": "Géographie",
       "categoryIcon": "🌍",
@@ -34,7 +34,7 @@
       "points": [5, 3, 1]
     }
   ],
-  "2026-02-16": [
+  "2026-02-17": [
     {
       "category": "Histoire",
       "categoryIcon": "📜",
@@ -69,10 +69,10 @@
       "points": [5, 3, 1]
     }
   ],
-  "2026-02-17": [
+  "2026-02-18": [
     {
-      "category": "Astronomie",
-      "categoryIcon": "🌌",
+      "category": "Alimentation",
+      "categoryIcon": "🥖",
       "clues": [
         "Cet alcool est habituellement produit à partir de céréales (seigle, blé) et de pommes de terre.",
         "C'est l'alcool national de la Russie.",

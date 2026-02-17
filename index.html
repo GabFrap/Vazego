@@ -438,23 +438,31 @@
         setCurrentQuestionIndex(0);
       }, [selectedDate]);
 
+      const [lastQuestionIndex, setLastQuestionIndex] = useState(null);
+
       useEffect(() => {
         if (!question) return;
         
         const isMobile = window.innerWidth <= 640;
         
         // Mobile: scroll down to show new clue + input boxes on clue 2 or 3
-        // Don't close keyboard (no blur), don't focus (no readonly trick)
+        // BUT only if we're on the same question (not loading a new question from calendar)
         if (isMobile && !isComplete && (currentClue === 1 || currentClue === 2)) {
-          setTimeout(() => {
-            // Scroll so the new clue appears at top, input boxes visible below
-            const clueEl = clueRefs.current[currentClue];
-            if (clueEl) {
-              clueEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 150);
-          return; // Don't do focus tricks when keyboard should stay open
+          // Check if this is the same question (clue advancement) or a new question (calendar navigation)
+          if (lastQuestionIndex === currentQuestionIndex) {
+            setTimeout(() => {
+              // Scroll so the new clue appears at top, input boxes visible below
+              const clueEl = clueRefs.current[currentClue];
+              if (clueEl) {
+                clueEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 150);
+            return; // Don't do focus tricks when keyboard should stay open
+          }
         }
+        
+        // Update last question index
+        setLastQuestionIndex(currentQuestionIndex);
         
         // Desktop only: auto-focus on clue change
         if (!isComplete && !isMobile) {
@@ -462,7 +470,7 @@
             if (inputRefs.current[0]) inputRefs.current[0].focus();
           }, 250);
         }
-      }, [currentClue, question, isComplete]);
+      }, [currentClue, question, isComplete, currentQuestionIndex, lastQuestionIndex]);
 
       useEffect(() => {
         if (!question) return;
@@ -1088,13 +1096,14 @@
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       onFocus={(e) => {
                         // On mobile: scroll to keep input boxes visible when keyboard opens
+                        // Longer delay to ensure keyboard has opened before scrolling
                         if (window.innerWidth <= 640 && inputContainerRef.current) {
                           setTimeout(() => {
                             inputContainerRef.current?.scrollIntoView({ 
                               behavior: 'smooth', 
                               block: 'center' 
                             });
-                          }, 300);
+                          }, 500);
                         }
                       }}
                       disabled={isComplete}

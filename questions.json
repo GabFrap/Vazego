@@ -1,5 +1,5 @@
 {
-  "2026-02-17": [
+  "2026-02-18": [
     {
       "category": "Géographie",
       "categoryIcon": "🌍",
@@ -34,7 +34,7 @@
       "points": [5, 3, 1]
     }
   ],
-  "2026-02-18": [
+  "2026-02-19": [
     {
       "category": "Histoire",
       "categoryIcon": "📜",
@@ -52,7 +52,7 @@
       "clues": [
         "Cette autrice belge prolifique publie un roman par an depuis 1992. (nom de famille)",
         "Elle a publié <i>Hygiène de l'Assassin</i> et <i>Les Catilinaires</i>.",
-        "Dans Métaphysique des tubes, Amélie _______ raconte les trois premières années de sa vie au Japon."
+        "Dans <i>Métaphysique des tubes</i>, Amélie _______ raconte les trois premières années de sa vie au Japon."
       ],
       "answer": "NOTHOMB",
       "points": [5, 3, 1]
@@ -69,7 +69,7 @@
       "points": [5, 3, 1]
     }
   ],
-  "2026-02-19": [
+  "2026-02-20": [
     {
       "category": "Alimentation",
       "categoryIcon": "🥖",
